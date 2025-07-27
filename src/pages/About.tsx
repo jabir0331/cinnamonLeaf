@@ -1,5 +1,7 @@
 import React from 'react';
 import { Heart, Users, Leaf, Clock } from 'lucide-react';
+import restaurantImg from '../assets/images/aboutUs/restaurantImg1.jpg'
+
 
 const About: React.FC = () => {
   const values = [
@@ -27,50 +29,33 @@ const About: React.FC = () => {
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="relative py-20 bg-sage-green-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-warm-brown-700 mb-6">
-              Our Story
-            </h1>
-            <p className="font-body text-xl text-warm-brown-600 max-w-3xl mx-auto">
-              Welcome to Cinnamon Leaf, where culinary passion meets warm hospitality in every dish we serve.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Main Story Section */}
-      <section className="py-20 bg-white">
+      <section className="mt-5 py-20 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-6">
                 A Journey of Flavors
               </h2>
-              <div className="space-y-6 font-body text-lg text-warm-brown-600">
+              <div className="space-y-6 font-body text-justify text-lg text-warm-brown-600">
                 <p>
-                  Founded in 2018, Cinnamon Leaf began as a dream to create a dining destination 
-                  where authentic flavors meet innovative fusion cuisine. Our founder, Chef Maria Santos, 
-                  traveled extensively to learn traditional cooking methods and bring those techniques 
-                  to our modern kitchen.
+                  Founded in 2018, Cinnamon Leaf began as Chef Nadeesha Perera’s vision to blend authentic 
+                  Sri Lankan flavors with global fusion cuisine. After exploring regional culinary traditions 
+                  across the island, she brought her inspirations into a modern kitchen creating a dining 
+                  experience that honors heritage while embracing innovation.
                 </p>
                 <p>
-                  What started as a small neighborhood restaurant has grown into a beloved community 
-                  gathering place. We pride ourselves on creating dishes that tell stories – each 
-                  recipe carefully crafted to honor culinary traditions while embracing creative innovation.
+                  From a humble eatery to a cherished local favorite, Cinnamon Leaf has grown into a warm gathering place for families, 
+                  working professionals, and travelers. With its cozy atmosphere and soulful dishes, 
+                  every guest becomes part of our extended family and the story we continue to tell.
                 </p>
-                <p>
-                  Our cozy atmosphere welcomes families celebrating special moments, young professionals 
-                  enjoying a relaxing meal after work, and tourists seeking an authentic local dining 
-                  experience. Every guest becomes part of our extended family.
-                </p>
+                
               </div>
             </div>
             <div className="relative">
               <img 
-                src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src= {restaurantImg}
                 alt="Chef preparing food"
                 className="rounded-2xl shadow-xl w-full h-96 object-cover"
               />
@@ -84,11 +69,11 @@ const About: React.FC = () => {
       {/* Values Section */}
       <section className="py-20 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-left mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-6">
               Our Values
             </h2>
-            <p className="font-body text-lg text-warm-brown-600 max-w-2xl mx-auto">
+            <p className="font-body text-lg text-warm-brown-600 max-w-6xl ">
               These core principles guide everything we do, from selecting ingredients 
               to creating memorable dining experiences.
             </p>
@@ -117,9 +102,9 @@ const About: React.FC = () => {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-left mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-6">
               Meet Our Team
             </h2>
@@ -185,33 +170,7 @@ const About: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Call to Action */}
-      <section className="py-20 bg-sage-green-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Join Our Story?
-          </h2>
-          <p className="font-body text-xl text-sage-green-100 mb-8">
-            Come experience the warmth, creativity, and exceptional flavors that make 
-            Cinnamon Leaf a special place for every occasion.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/contact"
-              className="bg-white text-sage-green-600 px-8 py-4 rounded-full font-body font-semibold text-lg hover:bg-cream-100 transition-colors duration-200"
-            >
-              Reserve Your Table
-            </a>
-            <a
-              href="/menu"
-              className="border-2 border-white text-white px-8 py-4 rounded-full font-body font-semibold text-lg hover:bg-white hover:text-sage-green-600 transition-colors duration-200"
-            >
-              Explore Our Menu
-            </a>
-          </div>
-        </div>
-      </section>
+ 
     </div>
   );
 };
