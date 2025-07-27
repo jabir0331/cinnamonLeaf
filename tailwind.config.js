@@ -43,7 +43,7 @@ export default {
       },
       fontFamily: {
         'display': ['Georgia', 'serif'],
-        'body': ['Inter', 'system-ui', 'sans-serif'],
+        'body': ['Poppins', 'sans-serif'],
       }
     },
   },
