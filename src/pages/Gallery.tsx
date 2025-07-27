@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
 // Import all gallery images
-import potatochipsImg from '../assets/images/gallery/potatochipsImg.jpg';
+import potatochipsImg from '../assets/images/gallery/potatoChipsImg.jpg';
 import frenchFries from '../assets/images/gallery/frenchFries.jpg';
 import chillyCheesFrenchFries from '../assets/images/gallery/chillyCheesFrenchFries.jpg';
 import momos from '../assets/images/gallery/momos.jpg';
