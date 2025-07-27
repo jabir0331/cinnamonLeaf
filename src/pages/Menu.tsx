@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { Salad, ChefHat, IceCream, Coffee } from 'lucide-react';
 
 interface MenuItem {
   name: string;
   description: string;
   price: string;
+  image: string;
   spicy?: boolean;
   vegetarian?: boolean;
   popular?: boolean;
@@ -22,34 +24,39 @@ const Menu: React.FC = () => {
       title: "Starters",
       items: [
         {
-          name: "Truffle Arancini",
-          description: "Crispy risotto balls stuffed with mozzarella, served with roasted tomato sauce",
-          price: "$14",
-          vegetarian: true,
-          popular: true
-        },
-        {
-          name: "Seared Scallops",
-          description: "Pan-seared scallops with cauliflower purée and pancetta crisps",
-          price: "$18"
-        },
-        {
-          name: "Spiced Lamb Sliders",
-          description: "Mini lamb patties with mint yogurt and pickled onions on brioche buns",
-          price: "$16",
-          spicy: true
-        },
-        {
-          name: "Burrata & Fig Salad",
-          description: "Fresh burrata with roasted figs, arugula, and balsamic reduction",
-          price: "$15",
+          name: "Bruschetta Trio",
+          description: "A vibrant trio of toasted baguette slices topped with fresh tomato-basil mix, creamy smashed avocado, and bold olive tapenade — each offering a unique burst of Mediterranean flavor and crunch",
+          price: "LKR 850",
+          image: "/src/assets/images/menu/starters/bruschettaTrio.jpg",
           vegetarian: true
         },
         {
-          name: "Crispy Calamari",
-          description: "Flash-fried squid rings with spicy marinara and lemon aioli",
-          price: "$13",
-          spicy: true
+          name: "Stuffed Mushrooms",
+          description: "Plump button mushrooms generously stuffed with a savory blend of herbed breadcrumbs, garlic, and melted cheese, baked until golden and bursting with earthy, cheesy goodness",
+          price: "LKR 1050",
+          image: "/src/assets/images/menu/starters/stuffedMushrooms.jpg",
+          vegetarian: true
+        },
+        {
+          name: "Cheesy Spinach Dip",
+          description: "A rich, velvety blend of spinach, cream cheese, mozzarella, and subtle spices, baked to perfection and served warm with crispy tortilla chips or toasted bread for the ultimate comfort dip",
+          price: "LKR 1050",
+          image: "/src/assets/images/menu/starters/cheesySpinachDip.jpg",
+          vegetarian: true
+        },
+        {
+          name: "Chicken Caesar Bites",
+          description: "Grilled chicken pieces nestled on crisp romaine lettuce cups, drizzled with creamy Caesar dressing, sprinkled with shaved parmesan, and finished with a crunchy crouton — a classic Caesar salad in every bite",
+          price: "LKR 1250",
+          image: "/src/assets/images/menu/starters/chickenCaesarBites.jpg",
+          popular: true
+        },
+        {
+          name: "Garlic Butter Prawns",
+          description: "Juicy prawns sautéed in a fragrant garlic butter sauce with hints of chili and lemon, served sizzling hot and garnished with herbs for a mouthwatering seafood delight",
+          price: "LKR 1450",
+          image: "/src/assets/images/menu/starters/garlicPrawn.jpg",
+          popular: true
         }
       ]
     },
@@ -57,38 +64,37 @@ const Menu: React.FC = () => {
       title: "Main Courses",
       items: [
         {
-          name: "Herb-Crusted Salmon",
-          description: "Atlantic salmon with herb crust, roasted vegetables, and lemon butter sauce",
-          price: "$28",
+          name: "Grilled Chicken Alfredo",
+          description: "Juicy grilled chicken served over fettuccine pasta, tossed in a rich, creamy Alfredo sauce made with butter, parmesan, and garlic a timeless Italian favorite.",
+          price: "LKR 1850",
+          image: "/src/assets/images/menu/mainCourses/grilledChickenAlfredo.jpg"
+        },
+        {
+          name: "Hyderabad Chicken Biriyani",
+          description: "A royal blend of fragrant basmati rice and succulent chicken, slow-cooked with saffron and bold Hyderabadi spices bursting with rich, authentic flavors in every bite",
+          price: "LKR 2250",
+          image: "/src/assets/images/menu/mainCourses/hyderabadChickenBiriyani.jpg",
           popular: true
         },
         {
-          name: "Braised Short Ribs",
-          description: "Slow-braised beef short ribs with garlic mashed potatoes and red wine jus",
-          price: "$32"
+          name: "Beef Lasagna",
+          description: "Layers of tender pasta, seasoned ground beef, rich tomato sauce, and creamy béchamel, all baked to golden perfection a hearty Italian classic loved by all.",
+          price: "LKR 2450",
+          image: "/src/assets/images/menu/mainCourses/beefLasagna.jpg"
         },
         {
-          name: "Truffle Mushroom Risotto",
-          description: "Creamy arborio rice with wild mushrooms, truffle oil, and parmesan",
-          price: "$24",
-          vegetarian: true,
+          name: "Beef Maqluba",
+          description: "A flavorful upside-down rice dish layered with tender beef, spiced vegetables, and aromatic basmati rice a comforting Middle Eastern classic with a dramatic flip and rich taste.",
+          price: "LKR 2850",
+          image: "/src/assets/images/menu/mainCourses/beefMaqluba.jpg",
           popular: true
         },
         {
-          name: "Duck Confit",
-          description: "Slow-cooked duck leg with cherry gastrique and roasted root vegetables",
-          price: "$30"
-        },
-        {
-          name: "Spicy Thai Curry",
-          description: "Coconut curry with your choice of chicken or tofu, jasmine rice",
-          price: "$22",
-          spicy: true
-        },
-        {
-          name: "Grilled Lamb Chops",
-          description: "Herb-marinated lamb chops with ratatouille and rosemary jus",
-          price: "$34"
+          name: "Mutton Mandi",
+          description: "Tender, slow-cooked mutton served over fragrant basmati rice, infused with Arabic spices with a traditional Yemeni dish that melts in your mouth",
+          price: "LKR 3250",
+          image: "/src/assets/images/menu/mainCourses/muttonMandi.jpg",
+          popular: true
         }
       ]
     },
@@ -96,33 +102,36 @@ const Menu: React.FC = () => {
       title: "Desserts",
       items: [
         {
+          name: "Chocolate Brownies",
+          description: "Rich and fudgy chocolate brownies with a chewy center, crisp edges, and deep cocoa flavor a timeless indulgence that melts in your mouth with every bite",
+          price: "LKR 250",
+          image: "/src/assets/images/menu/desert/brownies.jpg"
+        },
+        {
           name: "Chocolate Lava Cake",
-          description: "Warm chocolate cake with molten center, vanilla ice cream, and berry coulis",
-          price: "$12",
+          description: "A decadent mini cake with a warm, gooey molten chocolate center that flows out as you cut in served best with a scoop of vanilla ice cream for the ultimate dessert experience",
+          price: "LKR 750",
+          image: "/src/assets/images/menu/desert/chocolateLavaCake.jpg",
           popular: true
         },
         {
           name: "Tiramisu",
-          description: "Classic Italian dessert with espresso-soaked ladyfingers and mascarpone",
-          price: "$10"
+          description: "A luscious Italian classic made with layers of espresso soaked ladyfingers and mascarpone cream, dusted with rich cocoa light, dreamy, and just the right touch of coffee",
+          price: "LKR 950",
+          image: "/src/assets/images/menu/desert/tiramisu.jpg"
         },
         {
-          name: "Lemon Tart",
-          description: "Tangy lemon curd in buttery pastry shell with whipped cream",
-          price: "$9",
-          vegetarian: true
+          name: "Strawberry Cheesecake",
+          description: "A smooth and creamy cheesecake on a buttery biscuit base, topped with a vibrant strawberry glaze and fresh berries the perfect balance of sweet, tart, and creamy",
+          price: "LKR 1050",
+          image: "/src/assets/images/menu/desert/strawberryCheeseCake.jpg",
+          popular: true
         },
         {
-          name: "Crème Brûlée",
-          description: "Vanilla custard with caramelized sugar crust and fresh berries",
-          price: "$11",
-          vegetarian: true
-        },
-        {
-          name: "Seasonal Fruit Tart",
-          description: "Fresh seasonal fruits on vanilla pastry cream with mint",
-          price: "$10",
-          vegetarian: true
+          name: "Apple Crumble",
+          description: "Warm spiced apples baked beneath a golden, buttery crumble topping served with a scoop of vanilla ice cream for a cozy and comforting treat",
+          price: "LKR 1150",
+          image: "/src/assets/images/menu/desert/appleCrumble.jpg"
         }
       ]
     },
@@ -130,126 +139,155 @@ const Menu: React.FC = () => {
       title: "Beverages",
       items: [
         {
-          name: "House Wine Selection",
-          description: "Carefully curated red, white, and rosé wines by the glass",
-          price: "$8-14"
+          name: "Lemon Iced Tea",
+          description: "A cool and zesty blend of brewed black tea and fresh lemon juice, served over ice the perfect balance of citrusy tang and smooth tea flavor",
+          price: "LKR 550",
+          image: "/src/assets/images/menu/beverages/lemonIcedTea.jpg"
         },
         {
-          name: "Craft Cocktails",
-          description: "Handcrafted cocktails featuring premium spirits and fresh ingredients",
-          price: "$12-16"
+          name: "Virgin Mojito",
+          description: "A refreshing mix of muddled mint, lime, and soda water with a hint of sweetness crisp, cool, and alcohol-free, perfect for any time of day",
+          price: "LKR 650",
+          image: "/src/assets/images/menu/beverages/virginMojito.jpg"
         },
         {
-          name: "Artisan Coffee",
-          description: "Single-origin coffee beans, espresso drinks, and specialty lattes",
-          price: "$4-6"
+          name: "Berry Sparkler",
+          description: "A bubbly, refreshing fusion of mixed berries and soda, lightly sweetened and served over ice fruity, fizzy, and full of vibrant flavor",
+          price: "LKR 750",
+          image: "/src/assets/images/menu/beverages/berrySparkler.jpg",
+          popular: true
         },
         {
-          name: "Fresh Juices",
-          description: "Daily pressed orange, apple, and seasonal fruit juices",
-          price: "$5-7",
-          vegetarian: true
+          name: "Iced Americano",
+          description: "Bold espresso shots poured over chilled water and ice clean, robust, and a favorite for coffee lovers who like it strong and smooth",
+          price: "LKR 850",
+          image: "/src/assets/images/menu/beverages/icedAmericano.jpg"
         },
         {
-          name: "Herbal Teas",
-          description: "Premium loose-leaf teas including chamomile, peppermint, and Earl Grey",
-          price: "$4",
-          vegetarian: true
+          name: "Vanilla Milkshake",
+          description: "Thick and creamy blend of vanilla ice cream and milk, whipped smooth for a nostalgic treat that’s rich, frosty, and satisfyingly sweet",
+          price: "LKR 850",
+          image: "/src/assets/images/menu/beverages/vanillaMilkshake.jpg"
         }
       ]
     }
   };
 
   const categories = [
-    { id: 'starters', label: 'Starters' },
-    { id: 'mains', label: 'Main Courses' },
-    { id: 'desserts', label: 'Desserts' },
-    { id: 'drinks', label: 'Beverages' }
+    { id: 'starters', label: 'Starters', icon: <Salad size={16} /> },
+    { id: 'mains', label: 'Main Courses', icon: <ChefHat size={16} /> },
+    { id: 'desserts', label: 'Desserts', icon: <IceCream size={16} /> },
+    { id: 'drinks', label: 'Beverages', icon: <Coffee size={16} /> }
   ];
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="relative py-20 bg-warm-brown-700">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-          style={{
-            backgroundImage: 'url(https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1)'
-          }}
-        ></div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display text-4xl md:text-5xl font-bold text-cream-100 mb-6">
+      {/* Menu Navigation */}
+      <section className="sticky top-15 md:top-20 z-40 bg-cream-50 border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
             Our Menu
-          </h1>
-          <p className="font-body text-xl text-cream-200 max-w-3xl mx-auto">
-            Discover our carefully crafted dishes that blend authentic flavors with creative innovation, 
+          </h2>
+          <p className="font-body text-lg text-warm-brown-600 max-w-7xl mb-8">
+            Discover our carefully crafted dishes that blend authentic flavors with creative innovation,
             using only the freshest seasonal ingredients.
           </p>
-        </div>
-      </section>
+          
 
-      {/* Menu Navigation */}
-      <section className="sticky top-16 md:top-20 z-40 bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8 overflow-x-auto py-4">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setActiveCategory(category.id)}
-                className={`whitespace-nowrap font-body font-medium pb-2 border-b-2 transition-colors duration-200 ${
-                  activeCategory === category.id
-                    ? 'text-sage-green-600 border-sage-green-600'
-                    : 'text-warm-brown-600 border-transparent hover:text-sage-green-600'
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
-          </nav>
+          <div className="mb-6">
+            <div className="flex gap-0.5 bg-warm-brown-100 rounded-xl p-1.5 mb-5 overflow-x-auto">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id)}
+                  className={`
+          flex-1 min-w-0 px-4 py-3 rounded-lg text-sm font-medium font-body
+          transition-all duration-200 ease-in-out
+          flex items-center justify-center gap-2
+          whitespace-nowrap
+          ${activeCategory === category.id
+                      ? 'bg-white text-sage-green-600 shadow-sm'
+                      : 'bg-transparent text-warm-brown-600 hover:bg-white/70 hover:text-sage-green-600'
+                    }
+        `}
+                >
+                  {/* Add icon if you have one */}
+                  {category.icon && (
+                    <span className="text-base block">
+                      {category.icon}
+                    </span>
+                  )}
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+
+
+
         </div>
       </section>
 
       {/* Menu Content */}
       <section className="py-16 bg-cream-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-            <h2 className="font-display text-3xl font-bold text-warm-brown-700 mb-8 text-center">
+            <h2 className="font-display text-3xl font-bold text-warm-brown-700 mb-10 text-center">
               {menuData[activeCategory].title}
             </h2>
 
             <div className="space-y-8">
               {menuData[activeCategory].items.map((item, index) => (
                 <div key={index} className="border-b border-cream-200 pb-6 last:border-b-0">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="font-body text-xl font-semibold text-warm-brown-700">
-                        {item.name}
-                      </h3>
-                      <div className="flex space-x-2">
-                        {item.popular && (
-                          <span className="bg-sage-green-100 text-sage-green-700 text-xs px-2 py-1 rounded-full font-medium">
-                            Popular
-                          </span>
-                        )}
-                        {item.spicy && (
-                          <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
-                            Spicy
-                          </span>
-                        )}
-                        {item.vegetarian && (
-                          <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
-                            Vegetarian
-                          </span>
-                        )}
-                      </div>
+                  <div className="flex gap-6">
+                    {/* Food Image */}
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg shadow-md"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                      />
                     </div>
-                    <span className="font-body text-lg font-semibold text-sage-green-600 ml-4">
-                      {item.price}
-                    </span>
+                    
+                    {/* Food Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="font-body text-xl font-semibold text-warm-brown-700">
+                            {item.name}
+                          </h3>
+                          <div className="flex space-x-2">
+                            {item.popular && (
+                              <span className="bg-sage-green-100 text-sage-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                Popular
+                              </span>
+                            )}
+                            {item.spicy && (
+                              <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                                Spicy
+                              </span>
+                            )}
+                            {item.vegetarian && (
+                              <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                Vegetarian
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="font-body text-lg font-semibold text-sage-green-600 ml-4">
+                          {item.price}
+                        </span>
+                      </div>
+                      <p className="font-body text-warm-brown-600 leading-relaxed max-w-3xl">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
-                  <p className="font-body text-warm-brown-600 leading-relaxed">
-                    {item.description}
-                  </p>
                 </div>
               ))}
             </div>
@@ -257,83 +295,6 @@ const Menu: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Images */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-12 text-center">
-            Taste the Experience
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="relative overflow-hidden rounded-2xl group">
-              <img 
-                src="https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="Grilled Salmon"
-                className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div className="absolute bottom-4 left-4 text-white">
-                <h3 className="font-body font-semibold">Fresh Seafood</h3>
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden rounded-2xl group">
-              <img 
-                src="https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="Pasta Dish"
-                className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div className="absolute bottom-4 left-4 text-white">
-                <h3 className="font-body font-semibold">Artisan Pasta</h3>
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden rounded-2xl group">
-              <img 
-                src="https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="Desserts"
-                className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div className="absolute bottom-4 left-4 text-white">
-                <h3 className="font-body font-semibold">Decadent Desserts</h3>
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden rounded-2xl group">
-              <img 
-                src="https://images.pexels.com/photos/544961/pexels-photo-544961.jpeg?auto=compress&cs=tinysrgb&w=400"
-                alt="Cocktails"
-                className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div className="absolute bottom-4 left-4 text-white">
-                <h3 className="font-body font-semibold">Craft Cocktails</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-16 bg-sage-green-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Taste These Flavors?
-          </h2>
-          <p className="font-body text-xl text-sage-green-100 mb-8">
-            Reserve your table today and experience our chef's carefully crafted dishes 
-            in our warm, welcoming atmosphere.
-          </p>
-          <a
-            href="/contact"
-            className="bg-white text-sage-green-600 px-8 py-4 rounded-full font-body font-semibold text-lg hover:bg-cream-100 transition-colors duration-200"
-          >
-            Make a Reservation
-          </a>
-        </div>
-      </section>
     </div>
   );
 };
