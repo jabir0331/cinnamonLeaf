@@ -120,10 +120,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
               ))}
               <div className="pt-4 border-t space-y-3">
-                {/* <a href="tel:+1234567890" className="flex items-center text-warm-brown-600">
-                  <Phone className="w-4 h-4 mr-2" />
-                  <span>(123) 456-7890</span>
-                </a> */}
+                
                 <Link
                   to="/reservation"
                   className="block w-full bg-sage-green-600 text-white text-center px-6 py-3 rounded-full font-medium"
