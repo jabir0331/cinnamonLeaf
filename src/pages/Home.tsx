@@ -1,23 +1,27 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Clock, Users, Award } from 'lucide-react';
+import { Sofa, ChefHat, Handshake, Star } from 'lucide-react'
+import landingImg from '../assets/images/heroBg.jpg';
+import signatureDish1 from '../assets/images/signatureDishes/herbCrustedSalmon.jpg';
+import signatureDish2 from '../assets/images/signatureDishes/truffleMushroomRisotto.jpg'
+import signatureDish3 from '../assets/images/signatureDishes/lavaCake.jpg'
 
 const Home: React.FC = () => {
   const features = [
     {
-      icon: <Award className="w-8 h-8 text-sage-green-600" />,
-      title: "Award-Winning Cuisine",
-      description: "Recognized for our exceptional fusion dishes and authentic flavors"
+      icon: <Sofa className="w-8 h-8 text-sage-green-600" />,
+      title: "Unforgettable Atmosphere",
+      description: "Step into a warm, elegant setting where every detail is designed perfect for romantic dinners, family gatherings, or special occasions."
     },
     {
-      icon: <Clock className="w-8 h-8 text-sage-green-600" />,
-      title: "Fresh Daily",
-      description: "All ingredients sourced fresh daily from local suppliers"
+      icon: <ChefHat className="w-8 h-8 text-sage-green-600" />,
+      title: "Inspired Culinary Creations",
+      description: "Our chefs craft each dish with passion and precision, blending traditional flavors with modern flair to create a menu that excites every palate."
     },
     {
-      icon: <Users className="w-8 h-8 text-sage-green-600" />,
-      title: "Family Friendly",
-      description: "Welcoming atmosphere perfect for families and gatherings"
+      icon: <Handshake className="w-8 h-8 text-sage-green-600" />,
+      title: "Exceptional Service, Every Time",
+      description: "From the moment you arrive to the last bite, our attentive team ensures your experience is seamless, personalized, and truly memorable."
     }
   ];
 
@@ -28,7 +32,7 @@ const Home: React.FC = () => {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1)'
+            backgroundImage: `url(${landingImg})`
           }}
         >
           <div className="absolute inset-0 bg-black/40"></div>
@@ -39,22 +43,22 @@ const Home: React.FC = () => {
             Cinnamon Leaf
           </h1>
           <p className="font-body text-xl md:text-2xl mb-8 text-cream-100">
-            A Taste of Comfort and Creativity
+            Where Every Leaf Tells a Story...
           </p>
-          <p className="font-body text-lg md:text-xl mb-12 text-cream-200 max-w-2xl mx-auto">
+          <p className="font-body text-lg md:text-xl mb-12 text-cream-200 max-w-3xl mx-auto">
             Experience authentic and fusion dishes crafted with passion in our cozy, 
             welcoming atmosphere. Perfect for families, professionals, and food lovers.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/contact"
-              className="bg-sage-green-600 text-white px-8 py-4 rounded-full font-body font-semibold text-lg hover:bg-sage-green-700 transition-colors duration-200"
+              to="/reservation"
+              className="bg-warm-brown-700 text-white px-12 py-3 rounded-full font-body font-semibold text-lg hover:bg-white hover:text-warm-brown-700 transition-colors duration-200"
             >
               Reserve a Table
             </Link>
             <Link
               to="/menu"
-              className="border-2 border-white text-white px-8 py-4 rounded-full font-body font-semibold text-lg hover:bg-white hover:text-warm-brown-700 transition-colors duration-200"
+              className="border-2 border-white text-white px-12 py-3 rounded-full font-body font-semibold text-lg hover:bg-white hover:text-warm-brown-700 transition-colors duration-200"
             >
               View Menu
             </Link>
@@ -63,15 +67,14 @@ const Home: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-cream-50">
+      <section className="mt-20 py-15 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-left mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
               Why Choose Cinnamon Leaf?
             </h2>
-            <p className="font-body text-lg text-warm-brown-600 max-w-2xl mx-auto">
-              We're committed to providing an exceptional dining experience that combines 
-              comfort, creativity, and quality in every dish we serve.
+            <p className="font-body text-lg text-warm-brown-600 max-w-5xl ">
+              We’re dedicated to delivering a dining experience that blends comfort, creativity, and quality in every dish.
             </p>
           </div>
 
@@ -84,7 +87,7 @@ const Home: React.FC = () => {
                 <h3 className="font-body text-xl font-semibold text-warm-brown-700 mb-4">
                   {feature.title}
                 </h3>
-                <p className="font-body text-warm-brown-600">
+                <p className="font-body text-justify text-warm-brown-600">
                   {feature.description}
                 </p>
               </div>
@@ -94,14 +97,14 @@ const Home: React.FC = () => {
       </section>
 
       {/* Signature Dishes */}
-      <section className="py-20 bg-white">
+      <section className="mt-20 py-15 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-left mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
               Signature Dishes
             </h2>
             <p className="font-body text-lg text-warm-brown-600">
-              Taste our chef's carefully crafted specialties
+              Discover our chef’s favorite creations — crafted with passion, bursting with flavor, and guaranteed to delight your palate.
             </p>
           </div>
 
@@ -109,7 +112,7 @@ const Home: React.FC = () => {
             <div className="group cursor-pointer">
               <div className="relative overflow-hidden rounded-2xl mb-6">
                 <img 
-                  src="https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=400"
+                  src= {signatureDish1}
                   alt="Grilled Salmon"
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -126,7 +129,7 @@ const Home: React.FC = () => {
             <div className="group cursor-pointer">
               <div className="relative overflow-hidden rounded-2xl mb-6">
                 <img 
-                  src="https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=400"
+                  src= {signatureDish2}
                   alt="Pasta Dish"
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -143,7 +146,7 @@ const Home: React.FC = () => {
             <div className="group cursor-pointer">
               <div className="relative overflow-hidden rounded-2xl mb-6">
                 <img 
-                  src="https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=400"
+                  src= {signatureDish3}
                   alt="Chocolate Dessert"
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -158,7 +161,7 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-right mt-12">
             <Link
               to="/menu"
               className="bg-sage-green-600 text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-sage-green-700 transition-colors duration-200"
@@ -170,9 +173,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* Reviews Preview */}
-      <section className="py-20 bg-sage-green-50">
+      <section className="mt-20 py-15 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-left mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
               What Our Guests Say
             </h2>
@@ -192,7 +195,7 @@ const Home: React.FC = () => {
                 was perfectly cooked and the service was outstanding."
               </p>
               <div className="font-body font-semibold text-warm-brown-700">
-                Sarah Johnson
+                Amal Gunarathna
               </div>
             </div>
 
@@ -209,7 +212,7 @@ const Home: React.FC = () => {
                 enjoyed the fusion dishes. Will definitely be back!"
               </p>
               <div className="font-body font-semibold text-warm-brown-700">
-                Michael Chen
+                Pathum Nissanka
               </div>
             </div>
 
@@ -226,15 +229,15 @@ const Home: React.FC = () => {
                 exceeded my expectations with their creative fusion dishes."
               </p>
               <div className="font-body font-semibold text-warm-brown-700">
-                Emma Rodriguez
+                Alex Carey
               </div>
             </div>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-right mt-12">
             <Link
               to="/testimonials"
-              className="bg-warm-brown-600 text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-warm-brown-700 transition-colors duration-200"
+              className="bg-sage-green-600 text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-sage-green-700 transition-colors duration-300"
             >
               Read More Reviews
             </Link>
