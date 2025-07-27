@@ -1,9 +1,27 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
+// Import all gallery images
+import potatochipsImg from '../assets/images/gallery/potatochipsImg.jpg';
+import frenchFries from '../assets/images/gallery/frenchFries.jpg';
+import chillyCheesFrenchFries from '../assets/images/gallery/chillyCheesFrenchFries.jpg';
+import momos from '../assets/images/gallery/momos.jpg';
+import chickenLolipop from '../assets/images/gallery/chickenLolipop.jpg';
+import crispySquid from '../assets/images/gallery/crispySquid.jpg';
+import crispyChicken from '../assets/images/gallery/crispyChicken.jpg';
+import grilledBBQChicken from '../assets/images/gallery/grilledBBQChicken.jpg';
+import chickenSandwich from '../assets/images/gallery/chickenSandwich.jpg';
+import chickenShawarma from '../assets/images/gallery/chickenShawarma.jpg';
+import pizzaImg from '../assets/images/gallery/pizzaImg.jpg';
+
+import cozyInterior from '../assets/images/gallery/interior/cozyInterior.jpg';
+import familyArea from '../assets/images/gallery/interior/familyArea.jpg';
+import kidsArea from '../assets/images/gallery/interior/kidsArea.jpg';
+import roofTopArea from '../assets/images/gallery/interior/roofTopArea.jpg';
+
 interface GalleryImage {
   id: number;
-  src: string;
+  src: any; // Imported image module or URL string
   alt: string;
   category: 'food' | 'interior' | 'ambiance';
 }
@@ -14,24 +32,24 @@ const Gallery: React.FC = () => {
 
   const images: GalleryImage[] = [
     // Food Images
-    { id: 1, src: '/src/assets/images/gallery/potatochipsImg.jpg', alt: 'Potato Chips', category: 'food' },
-    { id: 2, src: '/src/assets/images/gallery/frenchFries.jpg', alt: 'Salt and Pepper French Fries', category: 'food' },
-    { id: 3, src: '/src/assets/images/gallery/chillyCheesFrenchFries.jpg', alt: 'Chilly Cheesy French Fries', category: 'food' },
-    { id: 4, src: '/src/assets/images/gallery/momos.jpg', alt: 'Chicken Mayo Momos', category: 'food' },
-    { id: 5, src: '/src/assets/images/gallery/chickenLolipop.jpg', alt: 'Chicken Lolipop', category: 'food' },
-    { id: 6, src: '/src/assets/images/gallery/crispySquid.jpg', alt: 'Crispy Squid', category: 'food' },
-    { id: 7, src: '/src/assets/images/gallery/crispyChicken.jpg', alt: 'Crispy Chicken', category: 'food' },
-    { id: 8, src: '/src/assets/images/gallery/grilledBBQChicken.jpg', alt: 'Grilled BBQ Chicken', category: 'food' },
-    { id: 9, src: '/src/assets/images/gallery/chickenSandwich.jpg', alt: 'Chicken Avocado Melt Sandwich', category: 'food' },
-    { id: 10, src: '/src/assets/images/gallery/chickenShawarma.jpg', alt: 'Cheesy Chicken Shawarma', category: 'food' },
-    { id: 11, src: '/src/assets/images/gallery/pizzaImg.jpg', alt: 'Hawai Chicken Pizza', category: 'food' },
+    { id: 1, src: potatochipsImg, alt: 'Potato Chips', category: 'food' },
+    { id: 2, src: frenchFries, alt: 'Salt and Pepper French Fries', category: 'food' },
+    { id: 3, src: chillyCheesFrenchFries, alt: 'Chilly Cheesy French Fries', category: 'food' },
+    { id: 4, src: momos, alt: 'Chicken Mayo Momos', category: 'food' },
+    { id: 5, src: chickenLolipop, alt: 'Chicken Lolipop', category: 'food' },
+    { id: 6, src: crispySquid, alt: 'Crispy Squid', category: 'food' },
+    { id: 7, src: crispyChicken, alt: 'Crispy Chicken', category: 'food' },
+    { id: 8, src: grilledBBQChicken, alt: 'Grilled BBQ Chicken', category: 'food' },
+    { id: 9, src: chickenSandwich, alt: 'Chicken Avocado Melt Sandwich', category: 'food' },
+    { id: 10, src: chickenShawarma, alt: 'Cheesy Chicken Shawarma', category: 'food' },
+    { id: 11, src: pizzaImg, alt: 'Hawai Chicken Pizza', category: 'food' },
     { id: 12, src: 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg?auto=compress&cs=tinysrgb&w=800', alt: 'Gourmet Burger', category: 'food' },
     
     //Interior Images
-    { id: 13, src: '/src/assets/images/gallery/interior/cozyInterior.jpg', alt: 'Main Dining Area', category: 'interior' },
-    { id: 14, src: '/src/assets/images/gallery/interior/familyArea.jpg', alt: 'Family Area', category: 'interior' },
-    { id: 15, src: '/src/assets/images/gallery/interior/kidsArea.jpg', alt: 'Kids Play Area', category: 'interior' },
-    { id: 16, src: '/src/assets/images/gallery/interior/roofTopArea.jpg', alt: 'Roof Top Area', category: 'interior' },
+    { id: 13, src: cozyInterior, alt: 'Main Dining Area', category: 'interior' },
+    { id: 14, src: familyArea, alt: 'Family Area', category: 'interior' },
+    { id: 15, src: kidsArea, alt: 'Kids Play Area', category: 'interior' },
+    { id: 16, src: roofTopArea, alt: 'Roof Top Area', category: 'interior' },
   ];
 
   const filteredImages = activeFilter === 'all'

@@ -1,11 +1,36 @@
 import React, { useState } from 'react';
 import { Salad, ChefHat, IceCream, Coffee } from 'lucide-react';
 
+// Import all menu images
+import bruschettaTrio from '../assets/images/menu/starters/bruschettaTrio.jpg';
+import stuffedMushrooms from '../assets/images/menu/starters/stuffedMushrooms.jpg';
+import cheesySpinachDip from '../assets/images/menu/starters/cheesySpinachDip.jpg';
+import chickenCaesarBites from '../assets/images/menu/starters/chickenCaesarBites.jpg';
+import garlicPrawn from '../assets/images/menu/starters/garlicPrawn.jpg';
+
+import grilledChickenAlfredo from '../assets/images/menu/mainCourses/grilledChickenAlfredo.jpg';
+import hyderabadChickenBiriyani from '../assets/images/menu/mainCourses/hyderabadChickenBiriyani.jpg';
+import beefLasagna from '../assets/images/menu/mainCourses/beefLasagna.jpg';
+import beefMaqluba from '../assets/images/menu/mainCourses/beefMaqluba.jpg';
+import muttonMandi from '../assets/images/menu/mainCourses/muttonMandi.jpg';
+
+import brownies from '../assets/images/menu/desert/brownies.jpg';
+import chocolateLavaCake from '../assets/images/menu/desert/chocolateLavaCake.jpg';
+import tiramisu from '../assets/images/menu/desert/tiramisu.jpg';
+import strawberryCheeseCake from '../assets/images/menu/desert/strawberryCheeseCake.jpg';
+import appleCrumble from '../assets/images/menu/desert/appleCrumble.jpg';
+
+import lemonIcedTea from '../assets/images/menu/beverages/lemonIcedTea.jpg';
+import virginMojito from '../assets/images/menu/beverages/virginMojito.jpg';
+import berrySparkler from '../assets/images/menu/beverages/berrySparkler.jpg';
+import icedAmericano from '../assets/images/menu/beverages/icedAmericano.jpg';
+import vanillaMilkshake from '../assets/images/menu/beverages/vanillaMilkshake.jpg';
+
 interface MenuItem {
   name: string;
   description: string;
   price: string;
-  image: string;
+  image: any; // Imported image module
   spicy?: boolean;
   vegetarian?: boolean;
   popular?: boolean;
@@ -27,35 +52,35 @@ const Menu: React.FC = () => {
           name: "Bruschetta Trio",
           description: "A vibrant trio of toasted baguette slices topped with fresh tomato-basil mix, creamy smashed avocado, and bold olive tapenade — each offering a unique burst of Mediterranean flavor and crunch",
           price: "LKR 850",
-          image: "/src/assets/images/menu/starters/bruschettaTrio.jpg",
+          image: bruschettaTrio,
           vegetarian: true
         },
         {
           name: "Stuffed Mushrooms",
           description: "Plump button mushrooms generously stuffed with a savory blend of herbed breadcrumbs, garlic, and melted cheese, baked until golden and bursting with earthy, cheesy goodness",
           price: "LKR 1050",
-          image: "/src/assets/images/menu/starters/stuffedMushrooms.jpg",
+          image: stuffedMushrooms,
           vegetarian: true
         },
         {
           name: "Cheesy Spinach Dip",
           description: "A rich, velvety blend of spinach, cream cheese, mozzarella, and subtle spices, baked to perfection and served warm with crispy tortilla chips or toasted bread for the ultimate comfort dip",
           price: "LKR 1050",
-          image: "/src/assets/images/menu/starters/cheesySpinachDip.jpg",
+          image: cheesySpinachDip,
           vegetarian: true
         },
         {
           name: "Chicken Caesar Bites",
           description: "Grilled chicken pieces nestled on crisp romaine lettuce cups, drizzled with creamy Caesar dressing, sprinkled with shaved parmesan, and finished with a crunchy crouton — a classic Caesar salad in every bite",
           price: "LKR 1250",
-          image: "/src/assets/images/menu/starters/chickenCaesarBites.jpg",
+          image: chickenCaesarBites,
           popular: true
         },
         {
           name: "Garlic Butter Prawns",
           description: "Juicy prawns sautéed in a fragrant garlic butter sauce with hints of chili and lemon, served sizzling hot and garnished with herbs for a mouthwatering seafood delight",
           price: "LKR 1450",
-          image: "/src/assets/images/menu/starters/garlicPrawn.jpg",
+          image: garlicPrawn,
           popular: true
         }
       ]
@@ -67,33 +92,33 @@ const Menu: React.FC = () => {
           name: "Grilled Chicken Alfredo",
           description: "Juicy grilled chicken served over fettuccine pasta, tossed in a rich, creamy Alfredo sauce made with butter, parmesan, and garlic a timeless Italian favorite.",
           price: "LKR 1850",
-          image: "/src/assets/images/menu/mainCourses/grilledChickenAlfredo.jpg"
+          image: grilledChickenAlfredo
         },
         {
           name: "Hyderabad Chicken Biriyani",
           description: "A royal blend of fragrant basmati rice and succulent chicken, slow-cooked with saffron and bold Hyderabadi spices bursting with rich, authentic flavors in every bite",
           price: "LKR 2250",
-          image: "/src/assets/images/menu/mainCourses/hyderabadChickenBiriyani.jpg",
+          image: hyderabadChickenBiriyani,
           popular: true
         },
         {
           name: "Beef Lasagna",
           description: "Layers of tender pasta, seasoned ground beef, rich tomato sauce, and creamy béchamel, all baked to golden perfection a hearty Italian classic loved by all.",
           price: "LKR 2450",
-          image: "/src/assets/images/menu/mainCourses/beefLasagna.jpg"
+          image: beefLasagna
         },
         {
           name: "Beef Maqluba",
           description: "A flavorful upside-down rice dish layered with tender beef, spiced vegetables, and aromatic basmati rice a comforting Middle Eastern classic with a dramatic flip and rich taste.",
           price: "LKR 2850",
-          image: "/src/assets/images/menu/mainCourses/beefMaqluba.jpg",
+          image: beefMaqluba,
           popular: true
         },
         {
           name: "Mutton Mandi",
           description: "Tender, slow-cooked mutton served over fragrant basmati rice, infused with Arabic spices with a traditional Yemeni dish that melts in your mouth",
           price: "LKR 3250",
-          image: "/src/assets/images/menu/mainCourses/muttonMandi.jpg",
+          image: muttonMandi,
           popular: true
         }
       ]
@@ -105,33 +130,33 @@ const Menu: React.FC = () => {
           name: "Chocolate Brownies",
           description: "Rich and fudgy chocolate brownies with a chewy center, crisp edges, and deep cocoa flavor a timeless indulgence that melts in your mouth with every bite",
           price: "LKR 250",
-          image: "/src/assets/images/menu/desert/brownies.jpg"
+          image: brownies
         },
         {
           name: "Chocolate Lava Cake",
           description: "A decadent mini cake with a warm, gooey molten chocolate center that flows out as you cut in served best with a scoop of vanilla ice cream for the ultimate dessert experience",
           price: "LKR 750",
-          image: "/src/assets/images/menu/desert/chocolateLavaCake.jpg",
+          image: chocolateLavaCake,
           popular: true
         },
         {
           name: "Tiramisu",
           description: "A luscious Italian classic made with layers of espresso soaked ladyfingers and mascarpone cream, dusted with rich cocoa light, dreamy, and just the right touch of coffee",
           price: "LKR 950",
-          image: "/src/assets/images/menu/desert/tiramisu.jpg"
+          image: tiramisu
         },
         {
           name: "Strawberry Cheesecake",
           description: "A smooth and creamy cheesecake on a buttery biscuit base, topped with a vibrant strawberry glaze and fresh berries the perfect balance of sweet, tart, and creamy",
           price: "LKR 1050",
-          image: "/src/assets/images/menu/desert/strawberryCheeseCake.jpg",
+          image: strawberryCheeseCake,
           popular: true
         },
         {
           name: "Apple Crumble",
           description: "Warm spiced apples baked beneath a golden, buttery crumble topping served with a scoop of vanilla ice cream for a cozy and comforting treat",
           price: "LKR 1150",
-          image: "/src/assets/images/menu/desert/appleCrumble.jpg"
+          image: appleCrumble
         }
       ]
     },
@@ -142,32 +167,32 @@ const Menu: React.FC = () => {
           name: "Lemon Iced Tea",
           description: "A cool and zesty blend of brewed black tea and fresh lemon juice, served over ice the perfect balance of citrusy tang and smooth tea flavor",
           price: "LKR 550",
-          image: "/src/assets/images/menu/beverages/lemonIcedTea.jpg"
+          image: lemonIcedTea
         },
         {
           name: "Virgin Mojito",
           description: "A refreshing mix of muddled mint, lime, and soda water with a hint of sweetness crisp, cool, and alcohol-free, perfect for any time of day",
           price: "LKR 650",
-          image: "/src/assets/images/menu/beverages/virginMojito.jpg"
+          image: virginMojito
         },
         {
           name: "Berry Sparkler",
           description: "A bubbly, refreshing fusion of mixed berries and soda, lightly sweetened and served over ice fruity, fizzy, and full of vibrant flavor",
           price: "LKR 750",
-          image: "/src/assets/images/menu/beverages/berrySparkler.jpg",
+          image: berrySparkler,
           popular: true
         },
         {
           name: "Iced Americano",
           description: "Bold espresso shots poured over chilled water and ice clean, robust, and a favorite for coffee lovers who like it strong and smooth",
           price: "LKR 850",
-          image: "/src/assets/images/menu/beverages/icedAmericano.jpg"
+          image: icedAmericano
         },
         {
           name: "Vanilla Milkshake",
-          description: "Thick and creamy blend of vanilla ice cream and milk, whipped smooth for a nostalgic treat that’s rich, frosty, and satisfyingly sweet",
+          description: "Thick and creamy blend of vanilla ice cream and milk, whipped smooth for a nostalgic treat that's rich, frosty, and satisfyingly sweet",
           price: "LKR 850",
-          image: "/src/assets/images/menu/beverages/vanillaMilkshake.jpg"
+          image: vanillaMilkshake
         }
       ]
     }
