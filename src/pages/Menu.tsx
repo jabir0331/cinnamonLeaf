@@ -1,5 +1,16 @@
-import React, { useState } from 'react';
-import { Salad, ChefHat, IceCream, Coffee } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Salad, ChefHat, IceCream, Coffee, Plus } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { useCart } from '../hooks/useCart';
+import CartButton from '../components/CartButton';
+import Cart from '../components/Cart';
+import CheckoutModal from '../components/CheckoutModal';
+import ConfirmationModal from '../components/ConfirmationModal';
+import { DeliveryInfo } from '../types/cart';
+import { createCheckoutSession } from '../services/api';
 
 // Import all menu images
 import bruschettaTrio from '../assets/images/menu/starters/bruschettaTrio.jpg';
@@ -43,6 +54,25 @@ interface MenuCategory {
 
 const Menu: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('starters');
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+
+  // Add refs to prevent duplicate toasts
+  const toastIdRef = useRef<any>(null);
+  const isProcessingOrder = useRef(false);
+
+  const {
+    cartItems,
+    isCartOpen,
+    setIsCartOpen,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    getTotalPrice,
+    getTotalItems
+  } = useCart();
 
   const menuData: Record<string, MenuCategory> = {
     starters: {
@@ -205,8 +235,148 @@ const Menu: React.FC = () => {
     { id: 'drinks', label: 'Beverages', icon: <Coffee size={16} /> }
   ];
 
+  const handleAddToCart = (item: MenuItem, category: string) => {
+    const cartItem = {
+      id: `${category}-${item.name.toLowerCase().replace(/\s+/g, '-')}`,
+      name: item.name,
+      price: parseInt(item.price.replace('LKR ', '').replace(',', '')),
+      image: item.image,
+      category
+    };
+
+    // Check if item already exists in cart
+    const existingItem = cartItems.find(existingCartItem => existingCartItem.id === cartItem.id);
+
+    addToCart(cartItem);
+
+    // Dismiss all existing toasts and show appropriate message
+    toast.dismiss();
+    setTimeout(() => {
+      if (existingItem) {
+        toastIdRef.current = toast.success(`${item.name} quantity updated!`);
+      } else {
+        toastIdRef.current = toast.success(`${item.name} added to cart!`);
+      }
+    }, 100);
+  };
+
+  const handleCheckout = () => {
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleConfirmOrder = async (deliveryInfo: DeliveryInfo, paymentMethod: 'cod' | 'card') => {
+    // Prevent duplicate order processing
+    if (isProcessingOrder.current) return;
+    isProcessingOrder.current = true;
+
+    if (paymentMethod === 'card') {
+      setIsCheckoutOpen(false);
+
+      try {
+        // Show loading toast
+        const loadingToast = toast.loading('Processing payment...');
+
+        // Create checkout session
+        const response = await createCheckoutSession({
+          items: cartItems,
+          deliveryInfo: deliveryInfo,
+          totalAmount: getTotalPrice()
+        });
+
+        // Dismiss loading toast
+        toast.dismiss(loadingToast);
+
+        if (response.success && response.checkoutUrl) {
+          // Clear cart before redirecting
+          clearCart();
+          
+          // Redirect to Stripe checkout
+          window.location.href = response.checkoutUrl;
+        } else {
+          throw new Error('Invalid response from server');
+        }
+
+      } catch (error) {
+        console.error('Stripe checkout error:', error);
+        toast.error(error instanceof Error ? error.message : 'Payment setup failed. Please try again.');
+        setIsCheckoutOpen(true); // Reopen checkout modal
+      }
+
+      isProcessingOrder.current = false;
+      return;
+    }
+
+    // Handle COD order
+    const newOrderNumber = uuidv4().substring(0, 8).toUpperCase();
+    setOrderNumber(newOrderNumber);
+    setIsCheckoutOpen(false);
+    setIsConfirmationOpen(true);
+    clearCart();
+
+    // Dismiss all toasts and show success message
+    toast.dismiss();
+    setTimeout(() => {
+      toastIdRef.current = toast.success('Order confirmed! We\'ll call you shortly.');
+    }, 100);
+
+    // Reset processing flag after a delay
+    setTimeout(() => {
+      isProcessingOrder.current = false;
+    }, 1000);
+  };
+
   return (
     <div>
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastClassName="font-body"
+        limit={1} // Limit to 1 toast at a time
+      />
+
+      {/* Cart Button */}
+      <CartButton
+        itemCount={getTotalItems()}
+        onClick={() => setIsCartOpen(true)}
+      />
+
+      {/* Cart Sidebar */}
+      <Cart
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeFromCart}
+        onCheckout={handleCheckout}
+        totalPrice={getTotalPrice()}
+      />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onConfirm={handleConfirmOrder}
+        totalPrice={getTotalPrice()}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isConfirmationOpen}
+        onClose={() => setIsConfirmationOpen(false)}
+        orderNumber={orderNumber}
+        estimatedDelivery="30-45 minutes"
+      />
+
       {/* Menu Navigation */}
       <section className="sticky top-15 md:top-20 z-40 bg-cream-50 border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
@@ -217,7 +387,6 @@ const Menu: React.FC = () => {
             Discover our carefully crafted dishes that blend authentic flavors with creative innovation,
             using only the freshest seasonal ingredients.
           </p>
-          
 
           <div className="mb-6">
             <div className="flex gap-0.5 bg-warm-brown-100 rounded-xl p-1.5 mb-5 overflow-x-auto">
@@ -247,10 +416,6 @@ const Menu: React.FC = () => {
               ))}
             </div>
           </div>
-
-
-
-
         </div>
       </section>
 
@@ -268,8 +433,8 @@ const Menu: React.FC = () => {
                   <div className="flex gap-6">
                     {/* Food Image */}
                     <div className="flex-shrink-0">
-                      <img 
-                        src={item.image} 
+                      <img
+                        src={item.image}
                         alt={item.name}
                         className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg shadow-md"
                         onError={(e) => {
@@ -278,9 +443,10 @@ const Menu: React.FC = () => {
                         }}
                       />
                     </div>
-                    
+
                     {/* Food Details */}
                     <div className="flex-1 min-w-0">
+                      {/* Header with name and badges */}
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center space-x-3">
                           <h3 className="font-body text-xl font-semibold text-warm-brown-700">
@@ -304,13 +470,32 @@ const Menu: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        <span className="font-body text-lg font-semibold text-sage-green-600 ml-4">
-                          {item.price}
-                        </span>
+
+                        {/* Price */}
+                        <div className="mb-3">
+                          <span className="font-body text-lg font-semibold text-sage-green-600">
+                            {item.price}
+                          </span>
+                        </div>
                       </div>
-                      <p className="font-body text-warm-brown-600 leading-relaxed max-w-3xl">
-                        {item.description}
-                      </p>
+
+                      {/* Description and Add to Cart Button - Now parallel */}
+                      <div className="flex justify-between items-start gap-4">
+                        <p className="font-body text-warm-brown-600 leading-relaxed flex-1">
+                          {item.description}
+                        </p>
+
+                        {/* Add to Cart Button - Now parallel to description */}
+                        <div className="flex-shrink-0">
+                          <button
+                            onClick={() => handleAddToCart(item, activeCategory)}
+                            className="bg-sage-green-600 hover:bg-sage-green-700 text-white font-body font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2 whitespace-nowrap"
+                          >
+                            <Plus size={16} />
+                            Add to Cart
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -319,7 +504,6 @@ const Menu: React.FC = () => {
           </div>
         </div>
       </section>
-
     </div>
   );
 };
