@@ -10,6 +10,7 @@ export interface CartItem {
 export interface DeliveryInfo {
   name: string;
   phone: string;
+  email: string;
   address: string;
   specialNotes?: string;
 }

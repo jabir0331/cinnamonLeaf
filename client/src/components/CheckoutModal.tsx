@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, CreditCard, Banknote, MapPin, Phone, User, MessageSquare } from 'lucide-react';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';   //This is to validate phone numbers
+import { X, CreditCard, Banknote, MapPin, Phone, User, MessageSquare, Mail } from 'lucide-react';
 import { DeliveryInfo } from '../types/cart';
 
 interface CheckoutModalProps {
@@ -18,6 +19,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
     name: '',
     phone: '',
+    email: '',
     address: '',
     specialNotes: ''
   });
@@ -27,9 +29,35 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const validateForm = () => {
     const newErrors: Partial<DeliveryInfo> = {};
 
-    if (!deliveryInfo.name.trim()) newErrors.name = 'Name is required';
-    if (!deliveryInfo.phone.trim()) newErrors.phone = 'Phone number is required';
-    if (!deliveryInfo.address.trim()) newErrors.address = 'Delivery address is required';
+    // Name validation
+    if (!deliveryInfo.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    // Phone validation
+    if (!deliveryInfo.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else {
+      const phoneNumber = parsePhoneNumberFromString(deliveryInfo.phone.trim(), 'LK');
+      if (!phoneNumber || !phoneNumber.isValid()) {
+        newErrors.phone = 'Invalid phone number';
+      }
+    }
+
+    // Email validation
+    if (!deliveryInfo.email.trim()) {
+      newErrors.email = 'Email address is required';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(deliveryInfo.email.trim())) {
+        newErrors.email = 'Invalid email address';
+      }
+    }
+
+    // Address validation
+    if (!deliveryInfo.address.trim()) {
+      newErrors.address = 'Delivery address is required';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -96,7 +124,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         }`}
                       placeholder="Enter your full name"
                     />
-
                   </div>
 
                   <div>
@@ -115,7 +142,24 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         }`}
                       placeholder="Enter your phone number"
                     />
+                  </div>
 
+                  <div>
+                    <label className="block font-body text-sm font-medium text-warm-brown-600 mb-2 flex">
+                      <Mail size={16} className="inline mr-1" />
+                      Email Address <span className="text-red-500 text-sm ml-2">*</span>
+                      {errors.email && (
+                        <p className="text-red-500 text-sm ml-1">{errors.email}</p>
+                      )}
+                    </label>
+                    <input
+                      type="email"
+                      value={deliveryInfo.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      className={`w-full px-4 py-3 border rounded-lg font-body focus:ring-2 focus:ring-sage-green-500 focus:border-sage-green-500 transition-colors ${errors.email ? 'border-red-500' : 'border-cream-300'
+                        }`}
+                      placeholder="Enter your email address"
+                    />
                   </div>
 
                   <div>
@@ -134,7 +178,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         }`}
                       placeholder="Enter your complete delivery address"
                     />
-
                   </div>
 
                   <div>
