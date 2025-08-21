@@ -56,7 +56,8 @@ export const createCheckoutSession = async (
     const result = await response.json();
     console.log('Checkout session created successfully:', result);
     return result;
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('API Error:', error);
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Unable to connect to server. Please check if the backend is running.');

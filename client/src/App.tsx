@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -8,11 +9,25 @@ import Contact from './pages/Contact';
 import Testimonials from './pages/Testimonials';
 import Reservation from './pages/Reservation';
 import OrderSuccess from './pages/OrderSuccess';
+import SignupPage from './pages/SignupPage';
+import LoginPage from './pages/LoginPage';
+import OrderHistory from './pages/OrderHistory';
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-cream-50">
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <Routes>
           {/* Routes that use the Layout component */}
           <Route path="/" element={<Layout><Home /></Layout>} />
@@ -22,9 +37,12 @@ function App() {
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/testimonials" element={<Layout><Testimonials /></Layout>} />
           <Route path="/reservation" element={<Layout><Reservation /></Layout>} />
-          
+          <Route path="/orderHistory" element={<Layout><OrderHistory /></Layout>} />
+
           {/* Routes that don't use the Layout component */}
           <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </div>
     </Router>
