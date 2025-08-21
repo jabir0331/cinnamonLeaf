@@ -1,5 +1,8 @@
+//server/routes/checkout.js
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Order = require('../models/Order');
+const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
 
@@ -24,7 +27,7 @@ router.post('/create-session', async (req, res) => {
     // Convert items to Stripe line items
     const lineItems = items.map(item => {
       console.log(`Processing item: ${item.name}, price: ${item.price}, quantity: ${item.quantity}`);
-      
+
       return {
         price_data: {
           currency: 'lkr', // Sri Lankan Rupees
@@ -85,7 +88,7 @@ router.post('/create-session', async (req, res) => {
 
   } catch (error) {
     console.error('Stripe checkout error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to create checkout session',
       message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
@@ -96,17 +99,17 @@ router.post('/create-session', async (req, res) => {
 router.get('/verify-session/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
-    
+
     console.log('Verifying session:', sessionId);
-    
+
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    
+
     console.log('Session retrieved:', {
       id: session.id,
       payment_status: session.payment_status,
       customer_details: session.customer_details
     });
-    
+
     if (session.payment_status === 'paid') {
       res.json({
         success: true,
@@ -127,7 +130,7 @@ router.get('/verify-session/:sessionId', async (req, res) => {
 });
 
 // Webhook endpoint for Stripe events (optional but recommended)
-router.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -150,11 +153,32 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
     case 'checkout.session.completed':
       const session = event.data.object;
       console.log('Payment succeeded for session:', session.id);
-      // Here you would typically:
-      // - Save the order to your database
-      // - Send confirmation email
-      // - Update inventory
-      // - Trigger fulfillment process
+
+      try {
+        // Create order from successful payment
+        const order = new Order({
+          orderNumber: uuidv4().substring(0, 8).toUpperCase(),
+          items: JSON.parse(session.metadata.orderItems),
+          deliveryInfo: {
+            name: session.metadata.customerName,
+            phone: session.metadata.customerPhone,
+            address: session.metadata.deliveryAddress,
+            email: session.customer_details?.email
+          },
+          totalAmount: parseFloat(session.metadata.totalAmount),
+          paymentMethod: 'card',
+          paymentStatus: 'paid',
+          orderStatus: 'confirmed',
+          stripeSessionId: session.id
+        });
+
+        await Order.create(order);
+        console.log('Order saved from webhook:', order.orderNumber);
+
+      } catch (error) {
+        console.error('Error saving order from webhook:', error);
+      }
+
       break;
     case 'payment_intent.payment_failed':
       const paymentIntent = event.data.object;
@@ -164,7 +188,7 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
       console.log(`Unhandled event type ${event.type}`);
   }
 
-  res.json({received: true});
+  res.json({ received: true });
 });
 
 module.exports = router;
