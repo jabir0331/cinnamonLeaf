@@ -17,11 +17,11 @@ const menuItemSchema = new mongoose.Schema({
         trim: true
     },
     price: {
-        type: String, // keeping as String since you store "LKR 550"
+        type: String, // keeping as String, to store "LKR 550"
         required: true
     },
     image: {
-        type: String, // relative path like "../assets/images/menu/beverages/icedAmericano.jpg"
+        type: String, 
         required: true
     },
     spicy: {

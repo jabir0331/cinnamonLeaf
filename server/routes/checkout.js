@@ -11,7 +11,7 @@ router.post('/create-session', async (req, res) => {
   try {
     console.log('Received checkout request:', req.body);
 
-    const { items, deliveryInfo, totalAmount } = req.body;
+    const { items, deliveryInfo, totalAmount, orderNumber } = req.body;
 
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -20,6 +20,10 @@ router.post('/create-session', async (req, res) => {
 
     if (!deliveryInfo || !deliveryInfo.name || !deliveryInfo.phone) {
       return res.status(400).json({ error: 'Delivery information is required' });
+    }
+
+    if (!orderNumber) {
+      return res.status(400).json({ error: 'Order number is required' });
     }
 
     console.log('Processing items:', items);
@@ -44,6 +48,9 @@ router.post('/create-session', async (req, res) => {
 
     console.log('Line items created:', lineItems);
 
+    // Use the order number passed from frontend (no need to generate a new one)
+    console.log('Using order number from frontend:', orderNumber);
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -53,14 +60,17 @@ router.post('/create-session', async (req, res) => {
       cancel_url: `${process.env.FRONTEND_URL}/menu?canceled=true`,
       customer_email: deliveryInfo.email || undefined,
       metadata: {
+        orderNumber: orderNumber,
         customerName: deliveryInfo.name,
         customerPhone: deliveryInfo.phone,
         deliveryAddress: deliveryInfo.address || '',
         totalAmount: totalAmount.toString(),
         orderItems: JSON.stringify(items.map(item => ({
+          id: item.id,
           name: item.name,
           quantity: item.quantity || 1,
-          price: item.price
+          price: item.price,
+          category: item.category
         })))
       },
       // Enable shipping address collection for Sri Lanka
@@ -77,13 +87,15 @@ router.post('/create-session', async (req, res) => {
     console.log('Stripe session created:', {
       id: session.id,
       url: session.url,
-      status: session.status
+      status: session.status,
+      orderNumber: orderNumber
     });
 
     res.json({
       success: true,
       checkoutUrl: session.url,
-      sessionId: session.id
+      sessionId: session.id,
+      orderNumber: orderNumber
     });
 
   } catch (error) {
@@ -95,7 +107,7 @@ router.post('/create-session', async (req, res) => {
   }
 });
 
-// Verify payment success (optional - for order confirmation)
+// Verify payment success and update order status
 router.get('/verify-session/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -107,16 +119,107 @@ router.get('/verify-session/:sessionId', async (req, res) => {
     console.log('Session retrieved:', {
       id: session.id,
       payment_status: session.payment_status,
-      customer_details: session.customer_details
+      customer_details: session.customer_details,
+      metadata: session.metadata
     });
 
     if (session.payment_status === 'paid') {
-      res.json({
-        success: true,
-        paymentStatus: session.payment_status,
-        customerDetails: session.customer_details,
-        metadata: session.metadata
-      });
+      // Update order status in database
+      try {
+        const orderNumber = session.metadata.orderNumber;
+        
+        if (orderNumber) {
+          // Find and update the existing order using $set
+          const updatedOrder = await Order.findOneAndUpdate(
+            { orderNumber },
+            {
+              $set: {
+                paymentStatus: 'paid',
+                orderStatus: 'confirmed',
+                stripeSessionId: session.id,
+                'deliveryInfo.email': session.customer_details?.email || session.metadata.customerEmail,
+                updatedAt: new Date()
+              }
+            },
+            { new: true }
+          );
+
+          if (updatedOrder) {
+            console.log('Order payment status updated:', {
+              orderNumber: updatedOrder.orderNumber,
+              paymentStatus: updatedOrder.paymentStatus,
+              orderStatus: updatedOrder.orderStatus
+            });
+
+            // Return the updated order details
+            res.json({
+              success: true,
+              paymentStatus: session.payment_status,
+              customerDetails: session.customer_details,
+              metadata: session.metadata,
+              orderDetails: {
+                orderNumber: updatedOrder.orderNumber,
+                items: updatedOrder.items,
+                deliveryInfo: updatedOrder.deliveryInfo,
+                totalAmount: updatedOrder.totalAmount,
+                orderStatus: updatedOrder.orderStatus,
+                createdAt: updatedOrder.createdAt
+              }
+            });
+          } else {
+            console.error('Order not found for update:', orderNumber);
+            
+            // If order not found, create a new one (fallback)
+            const newOrder = new Order({
+              orderNumber: orderNumber,
+              items: JSON.parse(session.metadata.orderItems),
+              deliveryInfo: {
+                name: session.metadata.customerName,
+                phone: session.metadata.customerPhone,
+                address: session.metadata.deliveryAddress,
+                email: session.customer_details?.email
+              },
+              totalAmount: parseFloat(session.metadata.totalAmount),
+              paymentMethod: 'card',
+              paymentStatus: 'paid',
+              orderStatus: 'confirmed',
+              stripeSessionId: session.id
+            });
+
+            const savedOrder = await newOrder.save();
+            console.log('New order created from verification:', savedOrder.orderNumber);
+
+            res.json({
+              success: true,
+              paymentStatus: session.payment_status,
+              customerDetails: session.customer_details,
+              metadata: session.metadata,
+              orderDetails: {
+                orderNumber: savedOrder.orderNumber,
+                items: savedOrder.items,
+                deliveryInfo: savedOrder.deliveryInfo,
+                totalAmount: savedOrder.totalAmount,
+                orderStatus: savedOrder.orderStatus,
+                createdAt: savedOrder.createdAt
+              }
+            });
+          }
+        } else {
+          throw new Error('Order number not found in session metadata');
+        }
+
+      } catch (dbError) {
+        console.error('Database error during order update:', dbError);
+        
+        // Still return success for payment but note the database issue
+        res.json({
+          success: true,
+          paymentStatus: session.payment_status,
+          customerDetails: session.customer_details,
+          metadata: session.metadata,
+          warning: 'Payment successful but order status update failed'
+        });
+      }
     } else {
       res.json({
         success: false,
@@ -129,7 +232,7 @@ router.get('/verify-session/:sessionId', async (req, res) => {
   }
 });
 
-// Webhook endpoint for Stripe events (optional but recommended)
+// Webhook endpoint for Stripe events (recommended for production)
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -155,28 +258,51 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       console.log('Payment succeeded for session:', session.id);
 
       try {
-        // Create order from successful payment
-        const order = new Order({
-          orderNumber: uuidv4().substring(0, 8).toUpperCase(),
-          items: JSON.parse(session.metadata.orderItems),
-          deliveryInfo: {
-            name: session.metadata.customerName,
-            phone: session.metadata.customerPhone,
-            address: session.metadata.deliveryAddress,
-            email: session.customer_details?.email
-          },
-          totalAmount: parseFloat(session.metadata.totalAmount),
-          paymentMethod: 'card',
-          paymentStatus: 'paid',
-          orderStatus: 'confirmed',
-          stripeSessionId: session.id
-        });
+        const orderNumber = session.metadata.orderNumber;
+        
+        if (orderNumber) {
+          // Update existing order using $set
+          const updatedOrder = await Order.findOneAndUpdate(
+            { orderNumber },
+            {
+              $set: {
+                paymentStatus: 'paid',
+                orderStatus: 'confirmed',
+                stripeSessionId: session.id,
+                'deliveryInfo.email': session.customer_details?.email,
+                updatedAt: new Date()
+              }
+            },
+            { new: true }
+          );
 
-        await Order.create(order);
-        console.log('Order saved from webhook:', order.orderNumber);
+          if (updatedOrder) {
+            console.log('Order updated via webhook:', updatedOrder.orderNumber);
+          } else {
+            // Fallback: create new order if not found
+            const order = new Order({
+              orderNumber: orderNumber,
+              items: JSON.parse(session.metadata.orderItems),
+              deliveryInfo: {
+                name: session.metadata.customerName,
+                phone: session.metadata.customerPhone,
+                address: session.metadata.deliveryAddress,
+                email: session.customer_details?.email
+              },
+              totalAmount: parseFloat(session.metadata.totalAmount),
+              paymentMethod: 'card',
+              paymentStatus: 'paid',
+              orderStatus: 'confirmed',
+              stripeSessionId: session.id
+            });
+
+            await order.save();
+            console.log('Order created via webhook:', order.orderNumber);
+          }
+        }
 
       } catch (error) {
-        console.error('Error saving order from webhook:', error);
+        console.error('Error processing webhook order:', error);
       }
 
       break;
