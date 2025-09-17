@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Salad, ChefHat, IceCream, Coffee, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { useCart } from '../hooks/useCart';
@@ -11,33 +11,8 @@ import CheckoutModal from '../components/CheckoutModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { DeliveryInfo } from '../types/cart';
 import { getAllMenuItems } from '../services/menuItems';
-import { saveOrder } from "../services/order"; // add this
+import { saveOrder } from "../services/order";
 import { createCheckoutSession } from '../services/api';
-
-// Import all menu images
-// import bruschettaTrio from '../assets/images/menu/starters/bruschettaTrio.jpg';
-// import stuffedMushrooms from '../assets/images/menu/starters/stuffedMushrooms.jpg';
-// import cheesySpinachDip from '../assets/images/menu/starters/cheesySpinachDip.jpg';
-// import chickenCaesarBites from '../assets/images/menu/starters/chickenCaesarBites.jpg';
-// import garlicPrawn from '../assets/images/menu/starters/garlicPrawn.jpg';
-
-// import grilledChickenAlfredo from '../assets/images/menu/mainCourses/grilledChickenAlfredo.jpg';
-// import hyderabadChickenBiriyani from '../assets/images/menu/mainCourses/hyderabadChickenBiriyani.jpg';
-// import beefLasagna from '../assets/images/menu/mainCourses/beefLasagna.jpg';
-// import beefMaqluba from '../assets/images/menu/mainCourses/beefMaqluba.jpg';
-// import muttonMandi from '../assets/images/menu/mainCourses/muttonMandi.jpg';
-
-// import brownies from '../assets/images/menu/desert/brownies.jpg';
-// import chocolateLavaCake from '../assets/images/menu/desert/chocolateLavaCake.jpg';
-// import tiramisu from '../assets/images/menu/desert/tiramisu.jpg';
-// import strawberryCheeseCake from '../assets/images/menu/desert/strawberryCheeseCake.jpg';
-// import appleCrumble from '../assets/images/menu/desert/appleCrumble.jpg';
-
-// import lemonIcedTea from '../assets/images/menu/beverages/lemonIcedTea.jpg';
-// import virginMojito from '../assets/images/menu/beverages/virginMojito.jpg';
-// import berrySparkler from '../assets/images/menu/beverages/berrySparkler.jpg';
-// import icedAmericano from '../assets/images/menu/beverages/icedAmericano.jpg';
-// import vanillaMilkshake from '../assets/images/menu/beverages/vanillaMilkshake.jpg';
 
 interface ApiMenuItem {
   _id: string;
@@ -67,7 +42,6 @@ interface MenuCategory {
 }
 
 const Menu: React.FC = () => {
-  const token = localStorage.getItem('token');
 
   const [menuData, setMenuData] = useState<Record<string, MenuCategory>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -113,7 +87,7 @@ const Menu: React.FC = () => {
         console.error('Fetch error:', error);
         toast.error('Failed to fetch menu items');
       } finally {
-        setTimeout (() => {
+        setTimeout(() => {
           setIsLoading(false);
         }, 1000);
 
@@ -198,7 +172,12 @@ const Menu: React.FC = () => {
 
   const handleCheckout = () => {
     setIsCartOpen(false);
-    setIsCheckoutOpen(true);
+
+    const token = localStorage.getItem('token');
+    if(!token)
+      toastIdRef.current = toast.error(`Please Login to proceed to checkout`);
+    else
+      setIsCheckoutOpen(true);
   };
 
   const handleConfirmOrder = async (deliveryInfo: DeliveryInfo, paymentMethod: 'cod' | 'card') => {
@@ -206,7 +185,8 @@ const Menu: React.FC = () => {
     if (isProcessingOrder.current) return;
     isProcessingOrder.current = true;
 
-    const newOrderNumber = "ORD - " + uuidv4().substring(0, 8).toUpperCase();
+    // Generate ONE order number that will be used for both database and Stripe
+    const newOrderNumber = "ORD-" + uuidv4().substring(0, 8).toUpperCase();
 
     // Prepare order payload
     const orderData = {
@@ -222,15 +202,15 @@ const Menu: React.FC = () => {
       deliveryInfo,
       totalAmount: getTotalPrice(),
       paymentMethod,
-      paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid'
+      paymentStatus: 'pending'
     };
 
     try {
-      // Save to backend
+      // Save to backend with the same order number
       await saveOrder(orderData);
-      console.log("Order saved successfully!");
+      console.log("Order saved successfully with order number:", newOrderNumber);
     } catch (err) {
-      toast.error("Failed to save order. Please try again.");
+      toast.error("Please login to create & track orders");
       isProcessingOrder.current = false;
       return;
     }
@@ -242,11 +222,12 @@ const Menu: React.FC = () => {
         // Show loading toast
         const loadingToast = toast.loading('Processing payment...');
 
-        // Create checkout session
+        // Create checkout session with the SAME order number
         const response = await createCheckoutSession({
           items: cartItems,
           deliveryInfo: deliveryInfo,
-          totalAmount: getTotalPrice()
+          totalAmount: getTotalPrice(),
+          orderNumber: newOrderNumber // Pass the same order number to Stripe
         });
 
         // Dismiss loading toast
@@ -290,37 +271,36 @@ const Menu: React.FC = () => {
       isProcessingOrder.current = false;
     }, 1000);
   };
+  // This is to hide the scroll bar when the cart is popped up
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [isCartOpen]);
 
   if (isLoading) {
-        return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cream-50 to-warm-brown-50 p-6">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-warm-brown-200 border-t-warm-brown-600 rounded-full animate-spin"></div>
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cream-50 via-warm-brown-50 to-sage-green-50 p-6">
+        <div className="relative mb-8">
+          <div className="w-16 h-16 border-4 border-warm-brown-200 border-t-warm-brown-600 rounded-full animate-spin shadow-lg"></div>
+          <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-sage-green-400 rounded-full animate-spin animate-reverse" style={{ animationDuration: '1.5s' }}></div>
         </div>
-        <p className="mt-6 text-warm-brown-700 font-body text-lg">Loading menu details...</p>
-                <p className="mt-2 text-warm-brown-500 text-sm">Fetching the menu details, please wait a moment</p>
-        
+        <div className="text-center">
+          <p className="mt-6 text-warm-brown-700 font-display text-2xl font-semibold">Loading menu details...</p>
+          <p className="mt-2 text-warm-brown-500 font-body text-base">Fetching the menu details, please wait a moment</p>
+        </div>
       </div>
-      );
-    }
+    );
+  }
 
   return (
     <div>
-      {/* Toast Container */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        toastClassName="font-body"
-        limit={1} // Limit to 1 toast at a time
-      />
 
       {/* Cart Button */}
       <CartButton
@@ -367,7 +347,7 @@ const Menu: React.FC = () => {
           </p>
 
           <div className="mb-6">
-            <div className="flex gap-0.5 bg-warm-brown-100 rounded-xl p-1.5 mb-5 overflow-x-auto">
+            <div className="flex gap-1 bg-warm-brown-100 rounded-xl p-1.5 mb-5 overflow-x-auto">
               {categories.map((category) => (
                 <button
                   key={category.id}

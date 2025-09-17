@@ -219,7 +219,7 @@ const LoginPage: React.FC = () => {
                     </div>
 
                     {/* Social Login Buttons */}
-                    <div className="space-y-3">
+                    {/* <div className="space-y-3">
                         <button
                             type="button"
                             className="w-full flex items-center justify-center px-4 py-3 border border-sage-green-200 rounded-lg bg-white hover:bg-cream-50 transition-colors font-body font-medium text-warm-brown-700"
@@ -232,7 +232,7 @@ const LoginPage: React.FC = () => {
                             </svg>
                             Continue with Google
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Sign Up Link */}
                     <div className="text-center">

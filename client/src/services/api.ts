@@ -17,6 +17,7 @@ export interface CreateCheckoutSessionRequest {
     address: string;
   };
   totalAmount: number;
+  orderNumber: string;
 }
 
 export interface CreateCheckoutSessionResponse {

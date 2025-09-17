@@ -27,6 +27,8 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
+          toastClassName="font-body"
+          limit={1} // Limit to 1 toast at a time
         />
         <Routes>
           {/* Routes that use the Layout component */}

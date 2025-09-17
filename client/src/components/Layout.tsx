@@ -64,12 +64,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     try {
       await logoutUser(token); // call backend
       localStorage.removeItem('token'); // clear locally
+      localStorage.removeItem('user');
       toast.success("Logged out successfully!");
-      // Redirect to login page after successful signup
-      // setTimeout(() => {
-      //   navigate("/login");
-      // }, 1000);
-      navigate("/login");
+      navigate("/");
     }
     catch (error) {
       console.error("Logout failed:", error);
@@ -117,13 +114,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Conditionally display Login or Logout Button */}
             {token ? (
-              <div className="hidden md:flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-5 mr-4">
                 <button onClick={handleLogout} className="bg-sage-green-600 text-white px-7 py-2 rounded-full">
                   Logout
                 </button>
               </div>
             ) : (
-              <div className="hidden md:flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-5">
                 <Link
                   to="/login"
                   className="bg-sage-green-600 text-white px-7 py-2 rounded-full font-medium hover:bg-sage-green-700 transition-colors duration-200"

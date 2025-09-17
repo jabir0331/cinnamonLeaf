@@ -10,7 +10,7 @@ const CartButton: React.FC<CartButtonProps> = ({ itemCount, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="fixed top-4 right-4 z-50 bg-sage-green-600 hover:bg-sage-green-700 text-white rounded-full p-3 shadow-lg transition-all duration-200 flex items-center gap-2"
+      className="fixed mt-0.5 top-4 right-4 z-50 bg-sage-green-600 hover:bg-sage-green-700 text-white rounded-full p-3 shadow-sm transition-all duration-200 flex items-center gap-2"
     >
       <ShoppingCart size={20} />
       {itemCount > 0 && (

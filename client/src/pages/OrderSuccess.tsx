@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { CheckCircle, Clock, ArrowLeft, XCircle, Home, Phone, ChefHat, Truck, DollarSign, ShoppingBag, Info } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { CheckCircle, Clock, ArrowLeft, XCircle, Home, Phone, ChefHat, Truck, ShoppingBag, Info } from 'lucide-react';
 import { verifyPaymentSession } from '../services/api';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import logo from '../assets/images/cinnamonLeafLogo.png';
+
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  category: string;
+}
 
 interface OrderDetails {
   success: boolean;
@@ -15,11 +22,25 @@ interface OrderDetails {
     phone?: string;
   };
   metadata?: {
+    orderNumber: string;
     customerName: string;
     customerPhone: string;
     deliveryAddress: string;
     totalAmount: string;
     orderItems: string;
+  };
+  orderDetails?: {
+    orderNumber: string;
+    items: OrderItem[];
+    deliveryInfo: {
+      name: string;
+      phone: string;
+      email?: string;
+      address: string;
+    };
+    totalAmount: number;
+    orderStatus: string;
+    createdAt: string;
   };
 }
 
@@ -28,7 +49,6 @@ const OrderSuccess: React.FC = () => {
   const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(true);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
-  const [orderNumber] = useState(Math.random().toString(36).substr(2, 8).toUpperCase());
   const [verificationError, setVerificationError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,7 +60,7 @@ const OrderSuccess: React.FC = () => {
 
     // Check if payment was canceled
     if (canceled === 'true') {
-      toast.info('Payment was canceled. Your cart items are still saved.');
+      toast.info('Payment was canceled');
       navigate('/menu');
       return;
     }
@@ -61,7 +81,6 @@ const OrderSuccess: React.FC = () => {
         if (result.success && result.paymentStatus === 'paid') {
           setOrderDetails(result);
           // Don't show success toast here - the visual success state is enough
-          // The user can see the checkmark and "Payment Successful!" message
         } else {
           setVerificationError(`Payment verification failed: ${result.paymentStatus || 'Unknown status'}`);
         }
@@ -79,32 +98,126 @@ const OrderSuccess: React.FC = () => {
     verifyPayment();
   }, [searchParams, navigate]);
 
-  // Parse order items if available
-  let parsedOrderItems = [];
-  if (orderDetails?.metadata?.orderItems) {
-    try {
-      parsedOrderItems = JSON.parse(orderDetails.metadata.orderItems);
-    } catch (error) {
-      console.error('Failed to parse order items:', error);
+  // Get order number from either orderDetails or metadata
+  const getOrderNumber = (): string => {
+    if (orderDetails?.orderDetails?.orderNumber) {
+      return orderDetails.orderDetails.orderNumber;
     }
-  }
+    if (orderDetails?.metadata?.orderNumber) {
+      return orderDetails.metadata.orderNumber;
+    }
+    return 'N/A';
+  };
+
+  // Get customer name
+  const getCustomerName = (): string => {
+    if (orderDetails?.orderDetails?.deliveryInfo?.name) {
+      return orderDetails.orderDetails.deliveryInfo.name;
+    }
+    if (orderDetails?.customerDetails?.name) {
+      return orderDetails.customerDetails.name;
+    }
+    if (orderDetails?.metadata?.customerName) {
+      return orderDetails.metadata.customerName;
+    }
+    return 'N/A';
+  };
+
+  // Get customer email
+  const getCustomerEmail = (): string => {
+    if (orderDetails?.orderDetails?.deliveryInfo?.email) {
+      return orderDetails.orderDetails.deliveryInfo.email;
+    }
+    if (orderDetails?.customerDetails?.email) {
+      return orderDetails.customerDetails.email;
+    }
+    return '';
+  };
+
+  // Get customer phone
+  const getCustomerPhone = (): string => {
+    if (orderDetails?.orderDetails?.deliveryInfo?.phone) {
+      return orderDetails.orderDetails.deliveryInfo.phone;
+    }
+    if (orderDetails?.metadata?.customerPhone) {
+      return orderDetails.metadata.customerPhone;
+    }
+    return '';
+  };
+
+  // Get delivery address
+  const getDeliveryAddress = (): string => {
+    if (orderDetails?.orderDetails?.deliveryInfo?.address) {
+      return orderDetails.orderDetails.deliveryInfo.address;
+    }
+    if (orderDetails?.metadata?.deliveryAddress) {
+      return orderDetails.metadata.deliveryAddress;
+    }
+    return '';
+  };
+
+  // Get order items
+  const getOrderItems = (): OrderItem[] => {
+    // First try to get from orderDetails (database)
+    if (orderDetails?.orderDetails?.items && Array.isArray(orderDetails.orderDetails.items)) {
+      return orderDetails.orderDetails.items;
+    }
+
+    // Fallback to metadata (Stripe session)
+    if (orderDetails?.metadata?.orderItems) {
+      try {
+        const parsedItems = JSON.parse(orderDetails.metadata.orderItems);
+        return Array.isArray(parsedItems) ? parsedItems : [];
+      } catch (error) {
+        console.error('Failed to parse order items from metadata:', error);
+        return [];
+      }
+    }
+
+    return [];
+  };
+
+  // Get total amount
+  const getTotalAmount = (): number => {
+    if (orderDetails?.orderDetails?.totalAmount) {
+      return orderDetails.orderDetails.totalAmount;
+    }
+    if (orderDetails?.metadata?.totalAmount) {
+      return parseFloat(orderDetails.metadata.totalAmount);
+    }
+    return 0;
+  };
+
+  // Format order creation date
+  const getOrderDate = (): string => {
+    if (orderDetails?.orderDetails?.createdAt) {
+      return new Date(orderDetails.orderDetails.createdAt).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    return new Date().toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const orderItems = getOrderItems();
+  const totalAmount = getTotalAmount();
+  const customerName = getCustomerName();
+  const customerEmail = getCustomerEmail();
+  const customerPhone = getCustomerPhone();
+  const deliveryAddress = getDeliveryAddress();
+  const orderNumber = getOrderNumber();
 
   return (
     <div className="min-h-screen bg-cream-50">
-      {/* Toast Container */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        limit={1} // Limit to 1 toast at a time
-      />
 
       {/* Main Content */}
       <div className="py-16">
@@ -175,53 +288,75 @@ const OrderSuccess: React.FC = () => {
               </div>
 
               {/* Order Details */}
-              <div className="bg-cream-50 rounded-xl p-6 mb-0">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="bg-cream-50 rounded-xl p-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="text-left">
                     <span className="font-medium text-warm-brown-700">Order Number:</span>
-                    <p className="font-body text-sage-green-600 font-semibold">#{orderNumber}</p>
+                    <p className="font-body text-sage-green-600 font-semibold">{orderNumber}</p>
                   </div>
                   
-                  <div className="text-right">
+                  <div className="text-left md:text-right">
                     <span className="font-medium text-warm-brown-700">Status:</span>
-                    <p className="font-body text-green-600 font-semibold flex items-center justify-end gap-1">
+                    <p className="font-body text-green-600 font-semibold flex items-center gap-1 md:justify-end">
                       <CheckCircle size={14} /> Confirmed
                     </p>
                   </div>
                   
-                  {(orderDetails.customerDetails?.name || orderDetails.metadata?.customerName) && (
+                  {customerName && customerName !== 'N/A' && (
                     <div className="text-left">
                       <span className="font-medium text-warm-brown-700">Customer:</span>
-                      <p className="font-body text-warm-brown-600">
-                        {orderDetails.customerDetails?.name || orderDetails.metadata?.customerName}
-                      </p>
+                      <p className="font-body text-warm-brown-600">{customerName}</p>
                     </div>
                   )}
                   
-                  {(orderDetails.customerDetails?.email) && (
-                    <div className="text-right">
+                  {customerEmail && (
+                    <div className="text-left md:text-right">
                       <span className="font-medium text-warm-brown-700">Email:</span>
-                      <p className="font-body text-warm-brown-600">{orderDetails.customerDetails.email}</p>
+                      <p className="font-body text-warm-brown-600">{customerEmail}</p>
                     </div>
                   )}
 
+                  {customerPhone && (
+                    <div className="text-left">
+                      <span className="font-medium text-warm-brown-700">Phone:</span>
+                      <p className="font-body text-warm-brown-600">{customerPhone}</p>
+                    </div>
+                  )}
 
+                  <div className="text-left md:text-right">
+                    <span className="font-medium text-warm-brown-700">Order Date:</span>
+                    <p className="font-body text-warm-brown-600">{getOrderDate()}</p>
+                  </div>
+
+                  {deliveryAddress && (
+                    <div className="text-left md:col-span-2">
+                      <span className="font-medium text-warm-brown-700">Delivery Address:</span>
+                      <p className="font-body text-warm-brown-600">{deliveryAddress}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Order Items */}
-              {parsedOrderItems.length > 0 && (
-                <div className="bg-cream-50 rounded-xl p-6 mb-5">
-                  <h3 className="font-body font-semibold text-warm-brown-700 text-m mb-5 flex items-center justify-center gap-2">
+              {orderItems.length > 0 && (
+                <div className="bg-cream-50 rounded-xl p-6 mb-8">
+                  <h3 className="font-body font-semibold text-warm-brown-700 text-lg mb-5 flex items-center justify-center gap-2">
                     <ShoppingBag size={18} />
                     Order Items
                   </h3>
-                  <div className="space-y-2 mb-4">
-                    {parsedOrderItems.map((item: any, index: number) => (
-                      <div key={index} className="flex justify-between items-center text-sm">
-                        <span className="text-warm-brown-600">
-                          {item.quantity}x {item.name}
-                        </span>
+                  <div className="space-y-3 mb-4">
+                    {orderItems.map((item: OrderItem, index: number) => (
+                      <div key={index} className="flex justify-between items-center text-sm border-b border-cream-200 pb-2 last:border-b-0">
+                        <div className="text-left">
+                          <span className="text-warm-brown-700 font-medium">
+                            {item.quantity}x {item.name}
+                          </span>
+                          {item.category && (
+                            <p className="text-xs text-warm-brown-500 mt-1">
+                              {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                            </p>
+                          )}
+                        </div>
                         <span className="font-medium text-warm-brown-700">
                           LKR {(item.price * item.quantity).toLocaleString()}
                         </span>
@@ -230,20 +365,20 @@ const OrderSuccess: React.FC = () => {
                   </div>
                   
                   {/* Total Amount */}
-                  <div className="border-t border-cream-200 pt-3">
+                  <div className="border-t border-cream-200 pt-4">
                     <div className="flex justify-between items-center">
                       <span className="font-body font-semibold text-warm-brown-700 text-base">
                         Total Amount
                       </span>
-                      <span className="font-body font-bold text-sage-green-600 text-lg flex items-center gap-1">
-                        LKR {orderDetails.metadata?.totalAmount ? parseInt(orderDetails.metadata.totalAmount).toLocaleString() : '0'}
+                      <span className="font-body font-bold text-sage-green-600 text-xl">
+                        LKR {totalAmount.toLocaleString()}
                       </span>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Next Steps - Updated with theme colors */}
+              {/* Next Steps */}
               <div className="bg-sage-green-50 rounded-xl p-6 mb-8">
                 <h3 className="font-body font-semibold text-sage-green-900 mb-4 flex items-center justify-center gap-2">
                   <Info size={18} />
@@ -252,7 +387,7 @@ const OrderSuccess: React.FC = () => {
                 <ul className="text-left text-sage-green-800 space-y-3 text-sm">
                   <li className="flex items-start gap-2">
                     <Phone size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
-                    We'll call you shortly to confirm your order
+                    We'll call you shortly to confirm your order details
                   </li>
                   <li className="flex items-start gap-2">
                     <ChefHat size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
