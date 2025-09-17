@@ -13,6 +13,15 @@ import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import OrderHistory from './pages/OrderHistory';
 
+// Admin 
+import AdminLayout from './components/admin/AdminLayout/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import MenuManagement from './pages/admin/MenuManagement';
+import CustomerManagement from './pages/admin/CustomerManagement';
+import OrderManagement from './pages/admin/OrderManagement';
+import Analytics from './pages/admin/Analytics';
+
+
 function App() {
   return (
     <Router>
@@ -45,6 +54,13 @@ function App() {
           <Route path="/order-success" element={<OrderSuccess />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
+          <Route path="/admin/menuManagement" element={<AdminLayout><MenuManagement /></AdminLayout>} />
+          <Route path="/admin/customerManagement" element={<AdminLayout><CustomerManagement /></AdminLayout>} />
+          <Route path="/admin/orderManagement" element={<AdminLayout><OrderManagement /></AdminLayout>} />
+          <Route path="/admin/analytics" element={<AdminLayout><Analytics /></AdminLayout>} />
         </Routes>
       </div>
     </Router>
