@@ -4,14 +4,18 @@ import DisplayTime from './DisplayTime';
 
 interface HeaderProps {
   headerText: string;
+  sidebarOpen: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({headerText}) => {
+const Header: React.FC<HeaderProps> = ({ headerText, sidebarOpen }) => {
   return (
-    <header className="bg-white shadow-sm border-b border-warm-brown-200">
+    <header 
+      className={`fixed top-0 z-50 bg-white shadow-sm border-b border-warm-brown-200 transition-all duration-300 ${
+        sidebarOpen ? 'left-72' : 'left-16'
+      } right-0`}
+    >
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center">
-          
           <div className="relative ml-5">
             <h1 className="text-3xl font-display font-bold text-warm-brown-800">{headerText}</h1>
             <div className="text-sm text-gray-400 mt-1">
@@ -21,7 +25,6 @@ const Header: React.FC<HeaderProps> = ({headerText}) => {
         </div>
         
         <div className="flex items-center space-x-4">
-          
           <div className="flex items-center space-x-3">
             <div className="text-right">
               <p className="text-sm font-semibold text-gray-800">Admin</p>

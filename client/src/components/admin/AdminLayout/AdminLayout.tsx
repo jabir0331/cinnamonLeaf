@@ -37,8 +37,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     setSidebarOpen={setSidebarOpen}
                 />
                 <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-                    <Header headerText={currentTab.header} />
-                    <main className="p-5">{children}</main>
+                    <Header headerText={currentTab.header} sidebarOpen={sidebarOpen} />
+                    {/* <main className="mt-20 py-6 px-5">{children}</main> */}
+                    <main className={`mt-20 py-6 px-5 ${sidebarOpen ? 'ml-10' : 'ml-3'
+                        } right-0`}>{children}</main>
                 </div>
             </div>
         </div>
