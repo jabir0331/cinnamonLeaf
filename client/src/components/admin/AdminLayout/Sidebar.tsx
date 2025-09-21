@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import logo from "../../../../public/images/cinnamonLeafLogo.png";
+import logo from "../../../assets/images/cinnamonLeafLogo.png";
 
 interface SidebarProps {
   activeTab: string;
