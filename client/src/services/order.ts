@@ -35,3 +35,40 @@ export const getUserOrders = async () => {
     throw err;
   }
 };
+
+// Add this to your existing order.ts file
+export const getOrders = async () => {
+  try {
+    // const token = localStorage.getItem("token");
+    // if (!token) throw new Error("No auth token found");
+
+    // const response = await axios.get(`${API_URL}/orders`, {
+    //   headers: { Authorization: `Bearer ${token}` },
+    // });
+    const response = await axios.get(`${API_URL}/orders`);
+
+    return response.data;
+  } catch (err: any) {
+    console.error("Error fetching orders:", err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const updateOrderStatus = async (orderId: string, status: string) => {
+  try {
+    // const token = localStorage.getItem("token");
+    // if (!token) throw new Error("No auth token found");
+
+    // const response = await axios.put(
+    //   `${API_URL}/orders/${orderId}/status`,
+    //   { status },
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    const response = await axios.put(`${API_URL}/orders/${orderId}/status`, {status});
+
+    return response.data;
+  } catch (err: any) {
+    console.error("Error updating order status:", err.response?.data || err.message);
+    throw err;
+  }
+};
