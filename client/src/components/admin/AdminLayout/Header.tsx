@@ -10,7 +10,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ headerText, sidebarOpen }) => {
   return (
     <header 
-      className={`fixed top-0 z-50 bg-white shadow-sm border-b border-warm-brown-200 transition-all duration-300 ${
+      className={`fixed top-0 z-30 bg-white shadow-sm border-b border-warm-brown-200 transition-all duration-300 ${
         sidebarOpen ? 'left-72' : 'left-16'
       } right-0`}
     >
