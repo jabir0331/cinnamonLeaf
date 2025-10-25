@@ -31,6 +31,16 @@ const MenuManagement: React.FC = () => {
   const [allMenuItems, setAllMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Prevent page scrolling when any modal is open
+  useEffect(() => {
+    const isAnyModalOpen = showAddModal || showEditModal || showDetailModal || showConfirmModal;
+    document.body.style.overflow = isAnyModalOpen ? 'hidden' : 'auto';
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showAddModal, showEditModal, showDetailModal, showConfirmModal]);
+
   const categories: CategoryTab[] = [
     { id: 'All', label: 'All Items', icon: <Layout size={16} /> },
     { id: 'Starters', label: 'Starters', icon: <Salad size={16} /> },
