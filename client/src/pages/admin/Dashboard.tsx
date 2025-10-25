@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Users, ShoppingBag, DollarSign } from 'lucide-react';
+import { TrendingUp, Users, ShoppingBag, DollarSign, History, Eye } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const stats = [
@@ -75,68 +75,94 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div key={index} className="bg-white rounded-lg shadow-sm p-6 border border-warm-brown-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                  <p className={`text-sm mt-1 ${stat.changeColor}`}>{stat.change} from last month</p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div key={index} className="bg-white rounded-lg shadow-sm p-6 border border-warm-brown-100">
+                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                <div className="flex items-center justify-between mt-2 mb-1">
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                  </div>
+                  <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+                    <Icon size={24} className="text-white" />
+                  </div>
                 </div>
-                <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
-                  <Icon size={24} className="text-white" />
-                </div>
+
+                <p className={`text-sm mt-1 ${stat.changeColor}`}>{stat.change} from last month</p>
               </div>
+            );
+          })}
+        </div>
+
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Orders */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center justify-between">
+              <div className="flex items-center">
+                <History className="mr-3 text-sage-green-600" size={24} />
+                Recent Orders
+              </div>
+              <button className="px-4 py-2 bg-sage-green-500 text-white rounded-lg hover:bg-sage-green-600 transition-colors duration-200 flex items-center text-sm font-medium">
+                <Eye size={16} className="mr-2" />
+                View All
+              </button>
+            </h3>
+            <div className="space-y-4">
+              {recentOrders.map((order, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-gray-100 hover:to-gray-150 transition-all duration-200 border border-gray-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-sage-green-100 rounded-full flex items-center justify-center">
+                      <Users size={16} className="text-sage-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{order.orderNumber}</p>
+                      <p className="text-sm text-gray-600">{order.customer}</p>
+                      <p className="text-xs text-gray-500">{order.time}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900 text-lg">{order.amount}</p>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)} capitalize`}>
+                      {order.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-warm-brown-100">
-          <h3 className="text-lg font-semibold text-warm-brown-800 mb-4">Recent Orders</h3>
-          <div className="space-y-4">
-            {recentOrders.map((order, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-warm-brown-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-gray-900">{order.orderNumber}</p>
-                  <p className="text-sm text-gray-600">{order.customer}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">{order.amount}</p>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                    {order.status.replace('_', ' ')}
-                  </span>
-                </div>
-              </div>
-            ))}
+            
           </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-warm-brown-100">
-          <h3 className="text-lg font-semibold text-warm-brown-800 mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            <button className="w-full p-3 bg-sage-green-500 text-white rounded-lg hover:bg-sage-green-600 transition-colors text-left">
-              Add New Menu Item
-            </button>
-            <button className="w-full p-3 bg-warm-brown-500 text-white rounded-lg hover:bg-warm-brown-600 transition-colors text-left">
-              View Pending Orders
-            </button>
-            <button className="w-full p-3 bg-cream-600 text-white rounded-lg hover:bg-cream-700 transition-colors text-left">
-              Generate Sales Report
-            </button>
+          {/* Quick Actions */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+              <TrendingUp className="mr-3 text-warm-brown-600" size={24} />
+              Quick Actions
+            </h3>
+            <div className="space-y-4">
+              <button className="w-full p-4 bg-gradient-to-r from-sage-green-500 to-sage-green-600 text-white rounded-xl hover:from-sage-green-600 hover:to-sage-green-700 transition-all duration-300 text-left flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <TrendingUp size={20} className="mr-3" />
+                Add New Menu Item
+              </button>
+              <button className="w-full p-4 bg-gradient-to-r from-warm-brown-500 to-warm-brown-600 text-white rounded-xl hover:from-warm-brown-600 hover:to-warm-brown-700 transition-all duration-300 text-left flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <ShoppingBag size={20} className="mr-3" />
+                View Pending Orders
+              </button>
+              <button className="w-full p-4 bg-gradient-to-r from-cream-600 to-cream-700 text-white rounded-xl hover:from-cream-700 hover:to-cream-800 transition-all duration-300 text-left flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <DollarSign size={20} className="mr-3" />
+                Generate Sales Report
+              </button>
+            </div>
           </div>
+
         </div>
       </div>
-
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Search, Hourglass, Calendar, Package, Clock, CheckCircle, Truck, X, Eye, RotateCcw, MapPin, CreditCard, Banknote } from 'lucide-react';
+import { Search, Info,Hourglass, Calendar, Package, CheckCircle, Truck, X, Eye, RotateCcw, MapPin, CreditCard, Banknote, Timer } from 'lucide-react';
 import { getUserOrders } from '../services/order';
 
 interface OrderItem {
@@ -101,7 +101,7 @@ const OrderHistory: React.FC = () => {
             case 'preparing':
                 return {
                     color: 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border-orange-200 shadow-sm',
-                    icon: <Clock size={16} className="drop-shadow-sm animate-pulse" />,
+                    icon: <Timer size={16} className="drop-shadow-sm animate-pulse" />,
                     label: 'Preparing',
                     pulseColor: 'bg-orange-400'
                 };
@@ -109,7 +109,7 @@ const OrderHistory: React.FC = () => {
                 return {
                     color: 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 shadow-sm',
                     icon: <Truck size={16} className="drop-shadow-sm" />,
-                    label: 'On Delivery',
+                    label: 'Out for Delivery',
                     pulseColor: 'bg-blue-400'
                 };
             case 'delivered':
@@ -269,7 +269,7 @@ const OrderHistory: React.FC = () => {
                                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
                                                 <div className="relative">
-                                                    <h3 className="font-display text-xl font-bold text-warm-brown-700 mb-2">
+                                                    <h3 className="font-body text-xl font-bold text-warm-brown-700 mb-2">
                                                         {order.orderNumber}
                                                     </h3>
                                                     <p className="font-body text-warm-brown-500 flex items-center gap-2">
@@ -313,9 +313,9 @@ const OrderHistory: React.FC = () => {
 
                                     {/* Enhanced Order Content */}
                                     <div className="p-8">
-                                        <div className="grid lg:grid-cols-3 gap-8">
+                                        <div className="grid lg:grid-cols-2 gap-5">
                                             {/* Enhanced Items */}
-                                            <div className="lg:col-span-2">
+                                            <div className="lg:col-span-1">
                                                 <h4 className="font-display font-semibold text-warm-brown-700 mb-6 text-lg flex items-center gap-2">
                                                     <Package size={20} className="text-sage-green-600" />
                                                     Items Ordered ({order.items.length})
@@ -415,11 +415,12 @@ const OrderHistory: React.FC = () => {
                                 </div>
 
                                 {/* Enhanced Order Info */}
-                                <div className="space-y-8">
+                                <div className="space-y-8 pt-2 pb-6">
                                     <div className="grid md:grid-cols-1 gap-6">
                                         <div className="bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl p-6 border-2 border-cream-200">
+                                        {/* <div className="bg-gradient-to-r from-sage-green-50 to-warm-brown-50 rounded-2xl p-6 border-2 border-cream-200"> */}
                                             <h3 className="font-display font-bold text-warm-brown-700 mb-6 flex items-center gap-3 text-lg">
-                                                <Package size={24} className="text-sage-green-600" />
+                                                <Info size={24} className="text-sage-green-600" />
                                                 Order Information
                                             </h3>
                                             <div className="space-y-4">
@@ -441,7 +442,8 @@ const OrderHistory: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        <div className="bg-gradient-to-r from-sage-green-50 to-warm-brown-50 rounded-2xl p-6 border-2 border-cream-200">
+                                        {/* <div className="bg-gradient-to-r from-sage-green-50 to-warm-brown-50 rounded-2xl p-6 border-2 border-cream-200"> */}
+                                        <div className="bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl p-6 border-2 border-cream-200">
                                             <h3 className="font-display font-bold text-warm-brown-700 mb-6 flex items-center gap-3 text-lg">
                                                 <MapPin size={24} className="text-sage-green-600" />
                                                 Delivery Information
@@ -460,8 +462,10 @@ const OrderHistory: React.FC = () => {
                                     </div>
 
                                     {/* Enhanced Items List */}
-                                    <div>
-                                        <h3 className="font-display font-bold text-warm-brown-700 mb-6 text-xl">
+                                    {/* <div> */}
+                                    <div className="bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl p-6 border-2 border-cream-200">
+                                        <h3 className="font-display font-bold text-warm-brown-700 mb-6 flex items-center gap-3 text-lg">
+                                            <Package size={24} className="text-sage-green-600" />
                                             Items Ordered
                                         </h3>
                                         <div className="space-y-4">
@@ -502,19 +506,6 @@ const OrderHistory: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Enhanced Action Buttons */}
-                                    <div className="flex gap-4 pt-6">
-                                        {selectedOrder.orderStatus === 'delivered' && (
-                                            <button
-                                                onClick={() => handleReorder(selectedOrder)}
-                                                className="flex-1 bg-gradient-to-r from-sage-green-600 to-sage-green-700 hover:from-sage-green-700 hover:to-sage-green-800 text-white font-body font-bold py-4 px-8 rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105"
-                                            >
-                                                <RotateCcw size={20} />
-                                                Reorder Items
-                                            </button>
-                                        )}
-
-                                    </div>
                                 </div>
                             </div>
                         </div>
