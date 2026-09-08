@@ -4,11 +4,13 @@ const fs = require('fs');
 
 const MenuItem = require("../models/MenuItems");
 
+const UPLOADS_DIR = path.join(__dirname, '../uploads/menu');
+
 // Configure storage for menu item images
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const category = req.body.category.toLowerCase().replace(/\s+/g, '_');
-    const uploadPath = `../client/public/images/menu/${category}`;
+    const uploadPath = path.join(UPLOADS_DIR, category);
 
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
@@ -68,8 +70,8 @@ exports.createMenuItem = [
         });
       }
 
-      // Generate relative path for the image (from client public folder)
-      const imagePath = `/images/menu/${category.toLowerCase().replace(/\s+/g, '_')}/${req.file.filename}`;
+      // Generate relative path for the image (served by the backend's own /uploads static route)
+      const imagePath = `/uploads/menu/${category.toLowerCase().replace(/\s+/g, '_')}/${req.file.filename}`;
 
       const newMenuItem = new MenuItem({
         name,
@@ -159,13 +161,13 @@ exports.updateMenuItem = [
       // If new image is uploaded
       if (req.file) {
         // Delete old image file
-        const oldImagePath = path.join('../client/public', existingItem.image);
+        const oldImagePath = path.join(__dirname, '..', existingItem.image);
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
 
         // Generate new image path
-        imagePath = `/images/menu/${category.toLowerCase().replace(/\s+/g, '_')}/${req.file.filename}`;
+        imagePath = `/uploads/menu/${category.toLowerCase().replace(/\s+/g, '_')}/${req.file.filename}`;
       }
 
       const updatedData = {

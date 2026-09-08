@@ -1,6 +1,7 @@
 import React from 'react';
 import { Eye, Edit, Power, PowerOff, Image, Star, Flame, Salad } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 interface CardViewProps {
   items: MenuItem[];
@@ -43,7 +44,7 @@ const CardView: React.FC<CardViewProps> = ({
           {/* Image Section */}
           <div className="h-56 bg-gradient-to-br from-cream-100 to-sage-green-100 relative overflow-hidden">
             <img
-              src={item.image}
+              src={getImageUrl(item.image)}
               alt={item.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               onError={onImageError}

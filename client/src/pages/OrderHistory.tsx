@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Search, Info,Hourglass, Calendar, Package, CheckCircle, Truck, X, Eye, RotateCcw, MapPin, CreditCard, Banknote, Timer } from 'lucide-react';
 import { getUserOrders } from '../services/order';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface OrderItem {
     id: string;
@@ -325,7 +326,7 @@ const OrderHistory: React.FC = () => {
                                                         <div key={item.id} className="flex items-center gap-4 p-4 bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-xl border border-cream-200/50 hover:shadow-md transition-all duration-200 group">
                                                             <div className="relative overflow-hidden rounded-xl shadow-md group-hover:shadow-lg transition-shadow duration-200">
                                                                 <img
-                                                                    src={item.image}
+                                                                    src={getImageUrl(item.image)}
                                                                     alt={item.name}
                                                                     className="w-16 h-16 object-cover transform group-hover:scale-110 transition-transform duration-200"
                                                                 />
@@ -473,7 +474,7 @@ const OrderHistory: React.FC = () => {
                                                 <div key={item.id} className="flex items-center gap-6 p-6 bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl border border-cream-200 hover:shadow-lg transition-all duration-200 group">
                                                     <div className="relative overflow-hidden rounded-2xl shadow-lg">
                                                         <img
-                                                            src={item.image}
+                                                            src={getImageUrl(item.image)}
                                                             alt={item.name}
                                                             className="w-20 h-20 object-cover transform group-hover:scale-110 transition-transform duration-200"
                                                         />

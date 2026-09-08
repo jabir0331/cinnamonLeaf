@@ -3,6 +3,7 @@ import { X, Upload, Save, RotateCcw, Salad, Flame, Crown } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import {updateMenuItem} from "../../../services/menuItems";
 import {toast} from 'react-toastify';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 interface EditItemModalProps {
     isOpen: boolean;
@@ -45,7 +46,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                 spicy: item.spicy || false,
                 popular: item.popular || false
             });
-            setPreviewImage(item.image || '');
+            setPreviewImage(getImageUrl(item.image) || '');
             setHasChanges(false);
         }
     }, [item]);
@@ -101,7 +102,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                 spicy: item.spicy || false,
                 popular: item.popular || false
             });
-            setPreviewImage(item.image || '');
+            setPreviewImage(getImageUrl(item.image) || '');
             setHasChanges(false);
         }
     };
