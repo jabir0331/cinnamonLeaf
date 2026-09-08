@@ -12,9 +12,13 @@ import OrderSuccess from './pages/OrderSuccess';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import OrderHistory from './pages/OrderHistory';
+import NotFound from './pages/NotFound';
+import Unauthorized from './pages/Unauthorized';
+import Forbidden from './pages/Forbidden';
 
-// Admin 
+// Admin
 import AdminLayout from './components/admin/AdminLayout/AdminLayout';
+import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import Dashboard from './pages/admin/Dashboard';
 import MenuManagement from './pages/admin/MenuManagement';
 import CustomerManagement from './pages/admin/CustomerManagement';
@@ -54,13 +58,18 @@ function App() {
           <Route path="/order-success" element={<OrderSuccess />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/401" element={<Unauthorized />} />
+          <Route path="/403" element={<Forbidden />} />
 
           {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
-          <Route path="/admin/menuManagement" element={<AdminLayout><MenuManagement /></AdminLayout>} />
-          <Route path="/admin/customerManagement" element={<AdminLayout><CustomerManagement /></AdminLayout>} />
-          <Route path="/admin/orderManagement" element={<AdminLayout><OrderManagement /></AdminLayout>} />
-          <Route path="/admin/analytics" element={<AdminLayout><Analytics /></AdminLayout>} />
+          <Route path="/admin/dashboard" element={<ProtectedAdminRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedAdminRoute>} />
+          <Route path="/admin/menuManagement" element={<ProtectedAdminRoute><AdminLayout><MenuManagement /></AdminLayout></ProtectedAdminRoute>} />
+          <Route path="/admin/customerManagement" element={<ProtectedAdminRoute><AdminLayout><CustomerManagement /></AdminLayout></ProtectedAdminRoute>} />
+          <Route path="/admin/orderManagement" element={<ProtectedAdminRoute><AdminLayout><OrderManagement /></AdminLayout></ProtectedAdminRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedAdminRoute><AdminLayout><Analytics /></AdminLayout></ProtectedAdminRoute>} />
+
+          {/* Catch-all */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>

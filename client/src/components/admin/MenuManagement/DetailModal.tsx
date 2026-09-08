@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit, Power, PowerOff, Image, X, Star, Clock, Utensils, Flame, Salad } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 interface DetailModalProps {
   isOpen: boolean;
@@ -50,7 +51,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
               <div className="relative">
                 <div className="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-cream-100 to-sage-green-100 shadow-lg relative group">
                   <img
-                    src={item.image}
+                    src={getImageUrl(item.image)}
                     alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={onImageError}

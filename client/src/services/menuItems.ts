@@ -21,9 +21,11 @@ export const getAllMenuItems = async () => {
 export const createMenuItem = async (formData: FormData) => {
   try {
     console.log('Creating menu item with form data');
+    const token = localStorage.getItem("token");
     const response = await axios.post(`${API_URL}/menu/create`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
       }
     });
     console.log('Create response:', response.data);
@@ -38,9 +40,11 @@ export const createMenuItem = async (formData: FormData) => {
 export const updateMenuItem = async (id: string, formData: FormData) => {
   try {
     console.log('Updating menu item with ID:', id);
+    const token = localStorage.getItem("token");
     const response = await axios.put(`${API_URL}/menu/update/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
       }
     });
     console.log('Update response:', response.data);
@@ -56,7 +60,10 @@ export const updateMenuItem = async (id: string, formData: FormData) => {
 export const toggleMenuItemStatus = async (id: string) => {
   try {
     console.log('Toggling status for menu item with ID:', id);
-    const response = await axios.patch(`${API_URL}/menu/toggle-status/${id}`);
+    const token = localStorage.getItem("token");
+    const response = await axios.patch(`${API_URL}/menu/toggle-status/${id}`, null, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     console.log('Toggle status response:', response.data);
     return response.data;
   } catch (err: any) {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Eye, Edit, Power, PowerOff, Image, Flame, Salad } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 interface TableViewProps {
   items: MenuItem[];
@@ -49,7 +50,7 @@ const TableView: React.FC<TableViewProps> = ({
                       <div className="flex-shrink-0 h-12 w-12">
                         <img
                           className="h-12 w-12 rounded-lg object-cover"
-                          src={item.image}
+                          src={getImageUrl(item.image)}
                           alt={item.name}
                           onError={onImageError}
                         />

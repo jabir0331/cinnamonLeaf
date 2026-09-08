@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag, DollarSign } from 'lucide-react';
 import { CartItem } from '../types/cart';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface CartProps {
   isOpen: boolean;
@@ -77,7 +78,7 @@ const Cart: React.FC<CartProps> = ({
                     <div className="flex gap-4">
                       <div className="relative">
                         <img
-                          src={item.image}
+                          src={getImageUrl(item.image)}
                           alt={item.name}
                           className="w-20 h-20 object-cover rounded-xl shadow-sm"
                         />
