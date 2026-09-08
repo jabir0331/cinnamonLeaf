@@ -28,22 +28,24 @@ const Home: React.FC = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url(${landingImg})`
-          }}
-        >
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
+      <section className="relative h-[70vh] sm:h-[80vh] lg:h-screen min-h-[500px] flex items-center justify-center overflow-hidden">
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src="/videos/heroBgVid.mp4"
+          poster={landingImg}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+        <div className="absolute inset-0 bg-black/50"></div>
         
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-3">
             Cinnamon Leaf
           </h1>
-          <p className="font-body text-xl md:text-2xl mb-8 text-cream-100">
-            Where Every Leaf Tells a Story...
+          <p className="font-body text-xl md:text-2xl mb-8 text-cream-100 italic">
+            Where every leaf tells a story...
           </p>
           <p className="font-body text-lg md:text-xl mb-12 text-cream-200 max-w-3xl mx-auto">
             Experience authentic and fusion dishes crafted with passion in our cozy, 
