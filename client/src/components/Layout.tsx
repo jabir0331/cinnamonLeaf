@@ -65,6 +65,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       await logoutUser(token); // call backend
       localStorage.removeItem('token'); // clear locally
       localStorage.removeItem('user');
+      localStorage.removeItem('role');
       toast.success("Logged out successfully!");
       navigate("/");
     }

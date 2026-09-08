@@ -14,9 +14,9 @@ exports.signup = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    res.status(201).json({ 
-      token, 
-      user: { id: user._id, name, email, phone } 
+    res.status(201).json({
+      token,
+      user: { id: user._id, name, email, phone, role: user.role }
     });
 
   } 
@@ -39,7 +39,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    res.json({ token, user: { id: user._id, name: user.name, email } });
+    res.json({ token, user: { id: user._id, name: user.name, email, role: user.role } });
   } 
   catch (err) {
     res.status(400).json({ error: err.message });

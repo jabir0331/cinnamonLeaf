@@ -78,6 +78,7 @@ const LoginPage: React.FC = () => {
 
             // Store token in localStorage
             localStorage.setItem('token', data.token);
+            localStorage.setItem('role', data.user?.role || 'user');
 
             // Reset form
             setFormData({
@@ -85,8 +86,8 @@ const LoginPage: React.FC = () => {
                 password: ''
             });
 
-            
-            navigate("/");
+
+            navigate(data.user?.role === 'admin' ? "/admin/dashboard" : "/");
         } catch (err: any) {
             toast.error(err.response?.data?.error || 'Invalid credentials');
             console.error(err);
