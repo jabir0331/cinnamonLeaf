@@ -1,12 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sofa, ChefHat, Handshake, Star } from 'lucide-react'
 import landingImg from '../assets/images/heroBg.jpg';
 import signatureDish1 from '../assets/images/signatureDishes/herbCrustedSalmon.jpg';
 import signatureDish2 from '../assets/images/signatureDishes/truffleMushroomRisotto.jpg'
 import signatureDish3 from '../assets/images/signatureDishes/lavaCake.jpg'
+import { getAllCategories } from '../services/categories';
+import { Category } from '../types/menu';
+import { getImageUrl } from '../utils/imageUrl';
+
+// Fisher-Yates shuffle, so every active category has a fair chance of
+// showing up in the homepage's 3 featured slots across page loads.
+const shuffle = <T,>(items: T[]): T[] => {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
 
 const Home: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    getAllCategories()
+      .then((data) => {
+        if (data.success) {
+          const active = data.categories.filter((c: Category) => c.isActive);
+          setCategories(shuffle(active).slice(0, 3));
+        }
+      })
+      .catch((err: unknown) => console.error('Error fetching categories:', err));
+  }, []);
+
   const features = [
     {
       icon: <Sofa className="w-8 h-8 text-sage-green-600" />,
@@ -67,6 +94,52 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Explore Categories */}
+      {categories.length > 0 && (
+        <section className="mt-20 py-15 bg-cream-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-left mb-10">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
+                Discover Our Food Categories
+              </h2>
+              <p className="font-body text-lg text-warm-brown-600 max-w-5xl">
+                Explore our selection of delicious favourites, from hearty meals to irresistible bites and refreshing drinks
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {categories.map((category) => (
+                <Link key={category._id} to={`/menu?category=${category.slug}`} className="group cursor-pointer">
+                  <div className="relative overflow-hidden rounded-2xl mb-6">
+                    <img
+                      src={getImageUrl(category.image)}
+                      alt={category.name}
+                      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <h3 className="font-body text-xl font-semibold text-warm-brown-700 mb-2">
+                    {category.name}
+                  </h3>
+                  <p className="font-body text-warm-brown-600">
+                    {category.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+
+            <div className="text-right mt-12">
+              <Link
+                to="/menu"
+                className="bg-sage-green-600 text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-sage-green-700 transition-colors duration-200"
+              >
+                Browse All Categories
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className="mt-20 py-15 bg-cream-50">
