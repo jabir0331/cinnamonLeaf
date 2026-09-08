@@ -1,6 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Plus, Salad, Crown, Flame } from 'lucide-react';
 import { createMenuItem } from '../../../services/menuItems';
+import { getAllCategories } from '../../../services/categories';
+import { Category } from '../../../types/menu';
 import { toast } from 'react-toastify';
 
 interface AddItemModalProps {
@@ -28,7 +30,19 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
     const [previewImage, setPreviewImage] = useState<string>('');
     const [dragActive, setDragActive] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        getAllCategories()
+            .then((data) => {
+                if (data.success) {
+                    setCategories(data.categories.filter((c: Category) => c.isActive));
+                }
+            })
+            .catch((err) => console.error('Error fetching categories:', err));
+    }, [isOpen]);
 
     // Form state
     const [formData, setFormData] = useState<FormDataState>({
@@ -213,10 +227,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                                 required
                                             >
                                                 <option value="">Select category</option>
-                                                <option value="Starters">Starters</option>
-                                                <option value="Main Courses">Main Courses</option>
-                                                <option value="Desserts">Desserts</option>
-                                                <option value="Beverages">Beverages</option>
+                                                {categories.map((cat) => (
+                                                    <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                                ))}
                                             </select>
                                         </div>
                                     </div>
