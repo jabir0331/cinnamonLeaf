@@ -10,6 +10,7 @@ interface AdminLayoutProps {
 const adminTabs = [
     { id: 'dashboard', path: '/admin/dashboard', header: 'Dashboard Overview' },
     { id: 'menu', path: '/admin/menuManagement', header: 'Menu Management' },
+    { id: 'categories', path: '/admin/categoryManagement', header: 'Category Management' },
     { id: 'orders', path: '/admin/orderManagement', header: 'Order Management' },
     { id: 'customers', path: '/admin/customerManagement', header: 'Customer Management' },
     { id: 'analytics', path: '/admin/analytics', header: 'Analytics Overview' },
