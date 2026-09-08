@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Save, RotateCcw, Salad, Flame, Crown } from 'lucide-react';
-import { MenuItem } from '../../../types/menu';
+import { MenuItem, Category } from '../../../types/menu';
 import {updateMenuItem} from "../../../services/menuItems";
+import { getAllCategories } from '../../../services/categories';
 import {toast} from 'react-toastify';
 import { getImageUrl } from '../../../utils/imageUrl';
 
@@ -31,7 +32,19 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
     const [previewImage, setPreviewImage] = useState<string>('');
     const [dragActive, setDragActive] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        getAllCategories()
+            .then((data) => {
+                if (data.success) {
+                    setCategories(data.categories.filter((c: Category) => c.isActive));
+                }
+            })
+            .catch((err) => console.error('Error fetching categories:', err));
+    }, [isOpen]);
 
     // Initialize form data when item changes
     useEffect(() => {
@@ -202,11 +215,10 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                                             onChange={(e) => handleInputChange('category', e.target.value)}
                                             className="w-full px-4 py-3 border border-warm-brown-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-green-500 focus:border-transparent transition-all font-body bg-white"
                                         >
-                                            <option selected disabled>Select category</option>
-                                            <option value="Starters">Starters</option>
-                                            <option value="Main Courses">Main Courses</option>
-                                            <option value="Desserts">Desserts</option>
-                                            <option value="Beverages">Beverages</option>
+                                            <option value="" disabled>Select category</option>
+                                            {categories.map((cat) => (
+                                                <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>

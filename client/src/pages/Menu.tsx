@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Salad, ChefHat, IceCream, Coffee, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
@@ -42,12 +43,29 @@ interface MenuCategory {
   items: MenuItem[];
 }
 
+// Maps a free-text category name (from the DB, or a homepage ?category= link)
+// onto one of the fixed tab keys this page renders.
+const mapCategoryNameToKey = (categoryName: string): string => {
+  const key = categoryName.toLowerCase();
+
+  if (key.includes('main')) return 'mains';
+  if (key.includes('starter')) return 'starters';
+  if (key.includes('dessert')) return 'desserts';
+  if (key.includes('drink') || key.includes('beverage')) return 'drinks';
+
+  return key;
+};
+
 const Menu: React.FC = () => {
 
+  const [searchParams] = useSearchParams();
   const [menuData, setMenuData] = useState<Record<string, MenuCategory>>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const [activeCategory, setActiveCategory] = useState('starters');
+  const [activeCategory, setActiveCategory] = useState(() => {
+    const requested = searchParams.get('category');
+    return requested ? mapCategoryNameToKey(requested) : 'starters';
+  });
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -108,19 +126,7 @@ const Menu: React.FC = () => {
     };
 
     apiItems.forEach(item => {
-      // Map API category names to your frontend category keys
-      let categoryKey = item.category.toLowerCase();
-
-      // Handle category mapping if needed
-      if (categoryKey.includes('main') || categoryKey.includes('mains')) {
-        categoryKey = 'mains';
-      } else if (categoryKey.includes('starters')) {
-        categoryKey = 'starters';
-      } else if (categoryKey.includes('desserts')) {
-        categoryKey = 'desserts';
-      } else if (categoryKey.includes('drink') || categoryKey.includes('beverages')) {
-        categoryKey = 'drinks';
-      }
+      const categoryKey = mapCategoryNameToKey(item.category);
 
       if (categories[categoryKey]) {
 
