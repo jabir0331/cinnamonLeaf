@@ -49,3 +49,15 @@ export interface Category {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface Promotion {
+  _id: string;
+  title: string;
+  description: string;
+  badgeText?: string;
+  validUntil?: string;
+  image?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
