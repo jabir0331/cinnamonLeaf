@@ -111,7 +111,7 @@ const PromotionManagement: React.FC = () => {
                         type="button"
                     >
                         <Plus size={20} />
-                        <span>Add New Promotion</span>
+                        <span>Add New Promo</span>
                     </button>
                 </div>
             </div>

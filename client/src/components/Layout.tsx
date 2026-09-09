@@ -38,8 +38,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About Us' },
     { path: '/menu', label: 'Menu' },
-    { path: '/gallery', label: 'Gallery' },
     { path: '/promotions', label: 'Promotions' },
+    { path: '/gallery', label: 'Gallery' },
     { path: '/contact', label: 'Contact Us' },
   ];
 
@@ -47,8 +47,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/', label: 'Home' },
     { path: '/menu', label: 'Menu' },
     { path: '/orderHistory', label: 'Order History' },
-    { path: '/gallery', label: 'Gallery' },
     { path: '/promotions', label: 'Promotions' },
+    { path: '/gallery', label: 'Gallery' },
     { path: '/contact', label: 'Contact Us' },
   ];
 
@@ -79,7 +79,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen">
      
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-gray-100 ${isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
         }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
           <div className="flex justify-between items-center h-16 md:h-20">

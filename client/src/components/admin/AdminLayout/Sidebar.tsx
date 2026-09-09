@@ -31,9 +31,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const menuItems = [
     { id: 'dashboard', path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'menu', path: '/admin/menuManagement', label: 'Menu Management', icon: ChefHat },
     { id: 'categories', path: '/admin/categoryManagement', label: 'Category Management', icon: Tag },
-    { id: 'promotions', path: '/admin/promotionManagement', label: 'Promotion Management', icon: Megaphone },
+    { id: 'menu', path: '/admin/menuManagement', label: 'Menu Management', icon: ChefHat },
+    { id: 'promotions', path: '/admin/promotionManagement', label: 'Promo Management', icon: Megaphone },
     { id: 'orders', path: '/admin/orderManagement', label: 'Order Management', icon: ShoppingBag },
     { id: 'customers', path: '/admin/customerManagement', label: 'Customer Management', icon: Users },
     { id: 'analytics', path: '/admin/analytics', label: 'Analytics & Reports', icon: BarChart3 },

@@ -36,7 +36,7 @@ const CardView: React.FC<CardViewProps> = ({
                     <p className="text-sage-green-600 font-body">
                         {hasAnyPromotions
                             ? 'Try adjusting your search or filter criteria'
-                            : 'Click "Add New Promotion" to create your first one'}
+                            : 'Click "Add New Promo" to create your first one'}
                     </p>
                 </div>
             </div>

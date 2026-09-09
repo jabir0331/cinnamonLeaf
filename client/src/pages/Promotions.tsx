@@ -32,24 +32,24 @@ const Promotions: React.FC = () => {
 
   return (
     <div>
-      <section className="py-20 bg-cream-50">
+      <section className="py-20 bg-cream-50 min-h-[85vh]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
             Today's Promotions
           </h2>
           <p className="font-body text-lg text-warm-brown-600 max-w-7xl mb-8">
-            Great food deserves a great deal &mdash; here's what's on offer right now.
+            Enjoy exclusive offers and delicious specials, updated fresh for you every day.
           </p>
 
           {promotions.length === 0 ? (
             <div className="text-center py-16">
-              <div className="bg-gradient-to-br from-cream-100 to-sage-green-50 rounded-2xl p-12 mx-auto max-w-lg">
+              <div className="bg-gradient-to-br from-cream-100 to-sage-green-50 rounded-2xl p-12 mx-auto max-w-xl">
                 <Megaphone size={64} className="mx-auto mb-6 text-sage-green-400" />
                 <h3 className="text-xl font-display font-semibold text-warm-brown-700 mb-2">
                   No promotions right now
                 </h3>
                 <p className="text-warm-brown-500 font-body">
-                  Check back soon &mdash; we're always cooking up new offers.
+                  Check back soon. We're always cooking up new offers
                 </p>
               </div>
             </div>
