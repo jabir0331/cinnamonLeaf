@@ -1,16 +1,21 @@
 // src/pages/admin/CategoryManagement.tsx
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Plus, Edit, Power, PowerOff, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { getAllCategories, toggleCategoryStatus } from '../../services/categories';
 import { Category } from '../../types/menu';
-import { getImageUrl } from '../../utils/imageUrl';
 import LoadingState from '../../components/LoadingState';
+import SearchBar from '../../components/admin/MenuManagement/SearchBar';
+import ViewToggle from '../../components/admin/MenuManagement/ViewToggle';
+import CardView from '../../components/admin/CategoryManagement/CardView';
+import TableView from '../../components/admin/CategoryManagement/TableView';
 import CategoryFormModal from '../../components/admin/CategoryManagement/CategoryFormModal';
 
 const CategoryManagement: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
     const [showFormModal, setShowFormModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [categoryToToggle, setCategoryToToggle] = useState<Category | null>(null);
@@ -42,6 +47,14 @@ const CategoryManagement: React.FC = () => {
             document.body.style.overflow = 'auto';
         };
     }, [showFormModal, categoryToToggle]);
+
+    const filteredCategories = categories.filter((category) => {
+        const term = searchTerm.toLowerCase();
+        return (
+            category.name.toLowerCase().includes(term) ||
+            category.description.toLowerCase().includes(term)
+        );
+    });
 
     const openAddModal = () => {
         setEditingCategory(null);
@@ -79,73 +92,44 @@ const CategoryManagement: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-end">
-                <button
-                    onClick={openAddModal}
-                    className="flex items-center space-x-2 bg-sage-green-500 text-white px-4 py-2 rounded-lg hover:bg-sage-green-600 transition-colors"
-                    type="button"
-                >
-                    <Plus size={20} />
-                    <span>Add New Category</span>
-                </button>
-            </div>
+            <div className="flex flex-col lg:flex-row gap-4">
+                <SearchBar
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    placeholder="Search categories..."
+                />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categories.map((category) => (
-                    <div
-                        key={category._id}
-                        className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+                <div className="flex items-center gap-2">
+                    <ViewToggle
+                        viewMode={viewMode}
+                        onViewModeChange={setViewMode}
+                    />
+
+                    <button
+                        onClick={openAddModal}
+                        className="flex items-center space-x-2 bg-sage-green-500 text-white px-4 py-2 rounded-lg hover:bg-sage-green-600 transition-colors"
+                        type="button"
                     >
-                        <div className="h-40 bg-gradient-to-br from-cream-100 to-sage-green-100 relative overflow-hidden">
-                            {category.image ? (
-                                <img src={getImageUrl(category.image)} alt={category.name} className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-warm-brown-300 font-body text-sm">
-                                    No image
-                                </div>
-                            )}
-                            <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium ${category.isActive
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-red-100 text-red-700'
-                                }`}>
-                                {category.isActive ? 'Active' : 'Inactive'}
-                            </div>
-                        </div>
-
-                        <div className="p-5">
-                            <h3 className="font-display text-lg font-semibold text-warm-brown-800 mb-2">{category.name}</h3>
-                            <p className="text-sm text-warm-brown-600 font-body mb-4 line-clamp-2">{category.description}</p>
-
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => openEditModal(category)}
-                                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-warm-brown-50 hover:bg-warm-brown-100 text-warm-brown-700 rounded-lg font-body text-sm font-medium transition-colors"
-                                    type="button"
-                                >
-                                    <Edit size={14} />
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => setCategoryToToggle(category)}
-                                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-body text-sm font-medium transition-colors ${category.isActive
-                                        ? 'bg-red-50 hover:bg-red-100 text-red-700'
-                                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
-                                        }`}
-                                    type="button"
-                                >
-                                    {category.isActive ? <PowerOff size={14} /> : <Power size={14} />}
-                                    {category.isActive ? 'Disable' : 'Enable'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                        <Plus size={20} />
+                        <span>Add New Category</span>
+                    </button>
+                </div>
             </div>
 
-            {categories.length === 0 && (
-                <div className="text-center py-16 text-warm-brown-400 font-body">
-                    No categories yet. Click "Add New Category" to create one.
-                </div>
+            {viewMode === 'card' ? (
+                <CardView
+                    categories={filteredCategories}
+                    hasAnyCategories={categories.length > 0}
+                    onEditCategory={openEditModal}
+                    onToggleStatus={setCategoryToToggle}
+                />
+            ) : (
+                <TableView
+                    categories={filteredCategories}
+                    hasAnyCategories={categories.length > 0}
+                    onEditCategory={openEditModal}
+                    onToggleStatus={setCategoryToToggle}
+                />
             )}
 
             <CategoryFormModal
