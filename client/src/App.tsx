@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import PageTitle from './components/PageTitle';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -31,6 +32,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-cream-50">
+        <PageTitle />
         <ToastContainer
           position="top-right"
           autoClose={3000}
