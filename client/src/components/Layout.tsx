@@ -39,7 +39,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/about', label: 'About Us' },
     { path: '/menu', label: 'Menu' },
     { path: '/gallery', label: 'Gallery' },
-    { path: '/testimonials', label: 'Testimonials' },
+    { path: '/promotions', label: 'Promotions' },
     { path: '/contact', label: 'Contact Us' },
   ];
 
@@ -48,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/menu', label: 'Menu' },
     { path: '/orderHistory', label: 'Order History' },
     { path: '/gallery', label: 'Gallery' },
-    { path: '/testimonials', label: 'Testimonials' },
+    { path: '/promotions', label: 'Promotions' },
     { path: '/contact', label: 'Contact Us' },
   ];
 
