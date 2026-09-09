@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Salad, ChefHat, IceCream, Coffee, Plus } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Salad, ChefHat, IceCream, Coffee, Plus, Flame, Sparkles } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -24,7 +25,7 @@ interface ApiMenuItem {
   category: string;
   spicy?: boolean;
   vegetarian?: boolean;
-  popular?: boolean;
+  signature?: boolean;
 }
 
 interface MenuItem {
@@ -34,7 +35,7 @@ interface MenuItem {
   image: any; // Imported image module
   spicy?: boolean;
   vegetarian?: boolean;
-  popular?: boolean;
+  signature?: boolean;
 }
 
 interface MenuCategory {
@@ -42,12 +43,29 @@ interface MenuCategory {
   items: MenuItem[];
 }
 
+// Maps a free-text category name (from the DB, or a homepage ?category= link)
+// onto one of the fixed tab keys this page renders.
+const mapCategoryNameToKey = (categoryName: string): string => {
+  const key = categoryName.toLowerCase();
+
+  if (key.includes('main')) return 'mains';
+  if (key.includes('starter')) return 'starters';
+  if (key.includes('dessert')) return 'desserts';
+  if (key.includes('drink') || key.includes('beverage')) return 'drinks';
+
+  return key;
+};
+
 const Menu: React.FC = () => {
 
+  const [searchParams] = useSearchParams();
   const [menuData, setMenuData] = useState<Record<string, MenuCategory>>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const [activeCategory, setActiveCategory] = useState('starters');
+  const [activeCategory, setActiveCategory] = useState(() => {
+    const requested = searchParams.get('category');
+    return requested ? mapCategoryNameToKey(requested) : 'starters';
+  });
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -108,19 +126,7 @@ const Menu: React.FC = () => {
     };
 
     apiItems.forEach(item => {
-      // Map API category names to your frontend category keys
-      let categoryKey = item.category.toLowerCase();
-
-      // Handle category mapping if needed
-      if (categoryKey.includes('main') || categoryKey.includes('mains')) {
-        categoryKey = 'mains';
-      } else if (categoryKey.includes('starters')) {
-        categoryKey = 'starters';
-      } else if (categoryKey.includes('desserts')) {
-        categoryKey = 'desserts';
-      } else if (categoryKey.includes('drink') || categoryKey.includes('beverages')) {
-        categoryKey = 'drinks';
-      }
+      const categoryKey = mapCategoryNameToKey(item.category);
 
       if (categories[categoryKey]) {
 
@@ -131,7 +137,7 @@ const Menu: React.FC = () => {
           image: item.image, // Fallback if image not found
           spicy: item.spicy,
           vegetarian: item.vegetarian,
-          popular: item.popular
+          signature: item.signature
         });
       }
     });
@@ -416,18 +422,21 @@ const Menu: React.FC = () => {
                               {item.name}
                             </h3>
                             <div className="flex space-x-2">
-                              {item.popular && (
-                                <span className="bg-sage-green-100 text-sage-green-700 text-xs px-2 py-1 rounded-full font-medium">
-                                  Popular
+                              {item.signature && (
+                                <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full font-medium">
+                                  <Sparkles size={12} />
+                                  Signature
                                 </span>
                               )}
                               {item.spicy && (
-                                <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                                <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                                  <Flame size={12} />
                                   Spicy
                                 </span>
                               )}
                               {item.vegetarian && (
-                                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                  <Salad size={12} />
                                   Vegetarian
                                 </span>
                               )}

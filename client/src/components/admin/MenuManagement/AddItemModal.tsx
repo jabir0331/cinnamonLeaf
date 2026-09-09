@@ -1,6 +1,8 @@
-import React, { useState, useRef } from 'react';
-import { X, Upload, Plus, Salad, Crown, Flame } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Upload, Plus, Salad, Flame, Sparkles } from 'lucide-react';
 import { createMenuItem } from '../../../services/menuItems';
+import { getAllCategories } from '../../../services/categories';
+import { Category } from '../../../types/menu';
 import { toast } from 'react-toastify';
 
 interface AddItemModalProps {
@@ -17,7 +19,7 @@ interface FormDataState {
     image: File | string;
     spicy: boolean;
     vegetarian: boolean;
-    popular: boolean;
+    signature: boolean;
 }
 
 const AddItemModal: React.FC<AddItemModalProps> = ({
@@ -28,7 +30,19 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
     const [previewImage, setPreviewImage] = useState<string>('');
     const [dragActive, setDragActive] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        getAllCategories()
+            .then((data) => {
+                if (data.success) {
+                    setCategories(data.categories.filter((c: Category) => c.isActive));
+                }
+            })
+            .catch((err) => console.error('Error fetching categories:', err));
+    }, [isOpen]);
 
     // Form state
     const [formData, setFormData] = useState<FormDataState>({
@@ -39,7 +53,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
         image: '',
         spicy: false,
         vegetarian: false,
-        popular: false
+        signature: false
     });
 
     if (!isOpen) return null;
@@ -97,7 +111,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             submitData.append('price', formData.price);
             submitData.append('spicy', formData.spicy.toString());
             submitData.append('vegetarian', formData.vegetarian.toString());
-            submitData.append('popular', formData.popular.toString());
+            submitData.append('signature', formData.signature.toString());
 
             // If image is a file, append it
             if (formData.image instanceof File) {
@@ -138,7 +152,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             image: '',
             spicy: false,
             vegetarian: false,
-            popular: false
+            signature: false
         });
         setPreviewImage('');
     };
@@ -213,10 +227,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                                 required
                                             >
                                                 <option value="">Select category</option>
-                                                <option value="Starters">Starters</option>
-                                                <option value="Main Courses">Main Courses</option>
-                                                <option value="Desserts">Desserts</option>
-                                                <option value="Beverages">Beverages</option>
+                                                {categories.map((cat) => (
+                                                    <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                                ))}
                                             </select>
                                         </div>
                                     </div>
@@ -350,17 +363,17 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                                 <span className="text-sm font-medium text-red-800">Spicy</span>
                                             </div>
                                         </label>
-                                        <label className="flex items-center bg-orange-50 border border-orange-200 px-4 py-3 rounded-xl cursor-pointer hover:bg-orange-100 transition-colors">
+                                        <label className="flex items-center bg-purple-50 border border-purple-200 px-4 py-3 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
                                             <input
                                                 type="checkbox"
-                                                name="popular"
-                                                checked={formData.popular}
+                                                name="signature"
+                                                checked={formData.signature}
                                                 onChange={handleCheckboxChange}
-                                                className="w-4 h-4 text-orange-600 border-orange-300 rounded focus:ring-orange-500 mr-3"
+                                                className="w-4 h-4 text-purple-600 border-purple-300 rounded focus:ring-purple-500 mr-3"
                                             />
                                             <div className="flex items-center">
-                                                <Crown size={16} className="text-orange-500 mr-2" />
-                                                <span className="text-sm font-medium text-orange-800">Popular Item</span>
+                                                <Sparkles size={16} className="text-purple-500 mr-2" />
+                                                <span className="text-sm font-medium text-purple-800">Signature Item</span>
                                             </div>
                                         </label>
                                     </div>

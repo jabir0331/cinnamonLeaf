@@ -1,11 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  ChefHat, 
-  ShoppingBag, 
+import {
+  LayoutDashboard,
+  Users,
+  ChefHat,
+  ShoppingBag,
   BarChart3,
+  Tag,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -30,6 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { id: 'dashboard', path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'menu', path: '/admin/menuManagement', label: 'Menu Management', icon: ChefHat },
+    { id: 'categories', path: '/admin/categoryManagement', label: 'Category Management', icon: Tag },
     { id: 'orders', path: '/admin/orderManagement', label: 'Order Management', icon: ShoppingBag },
     { id: 'customers', path: '/admin/customerManagement', label: 'Customer Management', icon: Users },
     { id: 'analytics', path: '/admin/analytics', label: 'Analytics & Reports', icon: BarChart3 },

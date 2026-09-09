@@ -1,10 +1,11 @@
 import React from 'react';
-import { Eye, Edit, Power, PowerOff, Image, Star, Flame, Salad } from 'lucide-react';
+import { Eye, Edit, Power, PowerOff, Image, Flame, Salad, Sparkles } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
 
 interface CardViewProps {
   items: MenuItem[];
+  hasAnyItems: boolean;
   onViewDetails: (item: MenuItem) => void;
   onEditItem: (item: MenuItem) => void;
   onToggleStatus: (itemId: string) => void;
@@ -13,21 +14,28 @@ interface CardViewProps {
 
 const CardView: React.FC<CardViewProps> = ({
   items,
+  hasAnyItems,
   onViewDetails,
-  onEditItem, 
+  onEditItem,
   onToggleStatus,
   onImageError
 }) => {
   if (items.length === 0) {
     return (
       <div className="col-span-full text-center py-16">
-        <div className="bg-gradient-to-br from-cream-50 to-sage-green-50 rounded-2xl p-12 mx-auto max-w-md">
+        <div className="bg-gradient-to-br from-cream-50 to-sage-green-50 rounded-2xl p-12 mx-auto max-w-lg">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-sage-green-200 to-warm-brown-200 rounded-full opacity-20 blur-xl"></div>
             <Image size={80} className="mx-auto mb-6 text-sage-green-400 relative z-10" />
           </div>
-          <h3 className="text-xl font-display font-semibold text-gray-800 mb-2">No menu items found</h3>
-          <p className="text-sage-green-600 font-body">Try adjusting your search or filter criteria to discover delicious options</p>
+          <h3 className="text-xl font-display font-semibold text-gray-800 mb-2">
+            {hasAnyItems ? 'No menu items found' : 'No menu items yet'}
+          </h3>
+          <p className="text-sage-green-600 font-body">
+            {hasAnyItems
+              ? 'Try adjusting your search or filter criteria'
+              : "Click \"Add New Menu Item\" to create your first one"}
+          </p>
         </div>
       </div>
     );
@@ -55,12 +63,6 @@ const CardView: React.FC<CardViewProps> = ({
 
             {/* Status Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">
-              {item.popular && (
-                <div className="flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
-                  <Star size={12} className="mr-1 fill-current" />
-                  Popular
-                </div>
-              )}
               {item.status === 'Unavailable' && (
                 <div className="bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
                   Disabled
@@ -70,6 +72,11 @@ const CardView: React.FC<CardViewProps> = ({
 
             {/* Dietary Icons */}
             <div className="absolute top-3 right-3 flex gap-2">
+              {item.signature && (
+                <div className="bg-orange-500 text-white rounded-full p-1.5 shadow-lg" title="Signature">
+                  <Sparkles size={18} />
+                </div>
+              )}
               {item.vegetarian && (
                 <div className="bg-green-500 text-white rounded-full p-1.5 shadow-lg" title="Vegetarian">
                   {/* <div className="w-3 h-3 bg-white rounded-full"></div> */}

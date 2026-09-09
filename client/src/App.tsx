@@ -21,6 +21,7 @@ import AdminLayout from './components/admin/AdminLayout/AdminLayout';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import Dashboard from './pages/admin/Dashboard';
 import MenuManagement from './pages/admin/MenuManagement';
+import CategoryManagement from './pages/admin/CategoryManagement';
 import CustomerManagement from './pages/admin/CustomerManagement';
 import OrderManagement from './pages/admin/OrderManagement';
 import Analytics from './pages/admin/Analytics';
@@ -64,6 +65,7 @@ function App() {
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<ProtectedAdminRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedAdminRoute>} />
           <Route path="/admin/menuManagement" element={<ProtectedAdminRoute><AdminLayout><MenuManagement /></AdminLayout></ProtectedAdminRoute>} />
+          <Route path="/admin/categoryManagement" element={<ProtectedAdminRoute><AdminLayout><CategoryManagement /></AdminLayout></ProtectedAdminRoute>} />
           <Route path="/admin/customerManagement" element={<ProtectedAdminRoute><AdminLayout><CustomerManagement /></AdminLayout></ProtectedAdminRoute>} />
           <Route path="/admin/orderManagement" element={<ProtectedAdminRoute><AdminLayout><OrderManagement /></AdminLayout></ProtectedAdminRoute>} />
           <Route path="/admin/analytics" element={<ProtectedAdminRoute><AdminLayout><Analytics /></AdminLayout></ProtectedAdminRoute>} />

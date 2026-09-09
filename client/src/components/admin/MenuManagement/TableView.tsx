@@ -1,10 +1,11 @@
 import React from 'react';
-import { Eye, Edit, Power, PowerOff, Image, Flame, Salad } from 'lucide-react';
+import { Edit, Power, PowerOff, Image, Flame, Salad, Sparkles } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
 
 interface TableViewProps {
   items: MenuItem[];
+  hasAnyItems: boolean;
   onViewDetails: (item: MenuItem) => void;
   onEditItem: (item: MenuItem) => void;
   onToggleStatus: (itemId: string) => void;
@@ -13,6 +14,7 @@ interface TableViewProps {
 
 const TableView: React.FC<TableViewProps> = ({
   items,
+  hasAnyItems,
   onViewDetails,
   onEditItem,
   onToggleStatus,
@@ -37,14 +39,22 @@ const TableView: React.FC<TableViewProps> = ({
                 <td colSpan={5} className="px-6 py-12 text-center">
                   <div className="text-gray-500">
                     <Image size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium">No menu items found</p>
-                    <p className="text-sm">Try adjusting your search or filter criteria</p>
+                    <p className="text-lg font-medium">{hasAnyItems ? 'No menu items found' : 'No menu items yet'}</p>
+                    <p className="text-sm">
+                      {hasAnyItems
+                        ? 'Try adjusting your search or filter criteria'
+                        : 'Click "Add New Menu Item" to create your first one'}
+                    </p>
                   </div>
                 </td>
               </tr>
             ) : (
               items.map((item) => (
-                <tr key={item._id} className={`hover:bg-gray-50 ${item.status === 'Unavailable' ? 'opacity-60' : ''}`}>
+                <tr
+                  key={item._id}
+                  onClick={() => onViewDetails(item)}
+                  className={`hover:bg-gray-50 cursor-pointer ${item.status === 'Unavailable' ? 'opacity-60' : ''}`}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-12 w-12">
@@ -61,10 +71,10 @@ const TableView: React.FC<TableViewProps> = ({
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 flex items-center space-x-2">
                           <span>{item.name}</span>
-                          {item.popular && (
-                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
-                              Popular
-                            </span>
+                          {item.signature && (
+                            <div className="bg-orange-500 text-white rounded-full p-1 shadow-lg text-xs" title="Signature">
+                              <Sparkles size={11} />
+                            </div>
                           )}
                           {item.vegetarian && (
                             <div className="bg-green-500 text-white rounded-full p-1 shadow-lg text-xs" title="Vegetarian">
@@ -100,15 +110,7 @@ const TableView: React.FC<TableViewProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => onViewDetails(item)}
-                        className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                        title="View Details"
-                        type="button"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        onClick={() => onEditItem(item)}
+                        onClick={(e) => { e.stopPropagation(); onEditItem(item); }}
                         className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                         title="Edit"
                         type="button"
@@ -116,7 +118,7 @@ const TableView: React.FC<TableViewProps> = ({
                         <Edit size={16} />
                       </button>
                       <button
-                        onClick={() => onToggleStatus(item._id)}
+                        onClick={(e) => { e.stopPropagation(); onToggleStatus(item._id); }}
                         className={`p-2 rounded-lg transition-colors ${item.status === 'Available'
                           ? 'text-red-600 hover:bg-red-100'
                           : 'text-green-600 hover:bg-green-100'

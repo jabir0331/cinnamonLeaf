@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Save, RotateCcw, Salad, Flame, Crown } from 'lucide-react';
-import { MenuItem } from '../../../types/menu';
+import { X, Upload, Save, RotateCcw, Salad, Flame, Sparkles } from 'lucide-react';
+import { MenuItem, Category } from '../../../types/menu';
 import {updateMenuItem} from "../../../services/menuItems";
+import { getAllCategories } from '../../../services/categories';
 import {toast} from 'react-toastify';
 import { getImageUrl } from '../../../utils/imageUrl';
 
@@ -26,12 +27,24 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
         image: '',
         vegetarian: false,
         spicy: false,
-        popular: false
+        signature: false
     });
     const [previewImage, setPreviewImage] = useState<string>('');
     const [dragActive, setDragActive] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        getAllCategories()
+            .then((data) => {
+                if (data.success) {
+                    setCategories(data.categories.filter((c: Category) => c.isActive));
+                }
+            })
+            .catch((err) => console.error('Error fetching categories:', err));
+    }, [isOpen]);
 
     // Initialize form data when item changes
     useEffect(() => {
@@ -44,7 +57,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                 image: item.image || '',
                 vegetarian: item.vegetarian || false,
                 spicy: item.spicy || false,
-                popular: item.popular || false
+                signature: item.signature || false
             });
             setPreviewImage(getImageUrl(item.image) || '');
             setHasChanges(false);
@@ -100,7 +113,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                 image: item.image || '',
                 vegetarian: item.vegetarian || false,
                 spicy: item.spicy || false,
-                popular: item.popular || false
+                signature: item.signature || false
             });
             setPreviewImage(getImageUrl(item.image) || '');
             setHasChanges(false);
@@ -118,7 +131,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
             formDataToSend.append('price', formData.price);
             formDataToSend.append('vegetarian', formData.vegetarian.toString());
             formDataToSend.append('spicy', formData.spicy.toString());
-            formDataToSend.append('popular', formData.popular.toString());
+            formDataToSend.append('signature', formData.signature.toString());
 
             // If image is a new file (base64 string), convert it to a file
             if (formData.image && formData.image.startsWith('data:image')) {
@@ -141,7 +154,6 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
 
                 onSave(updatedItem);
                 setHasChanges(false);
-                toast.success('Menu item updated successfully!');
             }
         } catch (error) {
             console.error('Error updating menu item:', error);
@@ -202,11 +214,10 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                                             onChange={(e) => handleInputChange('category', e.target.value)}
                                             className="w-full px-4 py-3 border border-warm-brown-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-green-500 focus:border-transparent transition-all font-body bg-white"
                                         >
-                                            <option selected disabled>Select category</option>
-                                            <option value="Starters">Starters</option>
-                                            <option value="Main Courses">Main Courses</option>
-                                            <option value="Desserts">Desserts</option>
-                                            <option value="Beverages">Beverages</option>
+                                            <option value="" disabled>Select category</option>
+                                            {categories.map((cat) => (
+                                                <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -332,16 +343,16 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                                             <span className="text-sm font-medium text-red-800">Spicy</span>
                                         </div>
                                     </label>
-                                    <label className="flex items-center bg-orange-50 border border-orange-200 px-4 py-3 rounded-xl cursor-pointer hover:bg-orange-100 transition-colors">
+                                    <label className="flex items-center bg-purple-50 border border-purple-200 px-4 py-3 rounded-xl cursor-pointer hover:bg-purple-100 transition-colors">
                                         <input
                                             type="checkbox"
-                                            checked={formData.popular}
-                                            onChange={(e) => handleInputChange('popular', e.target.checked)}
-                                            className="w-4 h-4 text-orange-600 border-orange-300 rounded focus:ring-orange-500 mr-3"
+                                            checked={formData.signature}
+                                            onChange={(e) => handleInputChange('signature', e.target.checked)}
+                                            className="w-4 h-4 text-purple-600 border-purple-300 rounded focus:ring-purple-500 mr-3"
                                         />
                                         <div className="flex items-center">
-                                            <Crown size={20} className="text-orange-500 mr-2" />
-                                            <span className="text-sm font-medium text-orange-800">Popular Item</span>
+                                            <Sparkles size={20} className="text-purple-500 mr-2" />
+                                            <span className="text-sm font-medium text-purple-800">Signature Item</span>
                                         </div>
                                     </label>
                                 </div>

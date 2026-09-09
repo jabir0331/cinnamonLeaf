@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, Power, PowerOff, Image, X, Star, Clock, Utensils, Flame, Salad } from 'lucide-react';
+import { Edit, Power, PowerOff, Image, X, Clock, Utensils, Flame, Salad, Sparkles } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
 
@@ -60,17 +60,12 @@ const DetailModal: React.FC<DetailModalProps> = ({
                     <Image size={80} />
                   </div>
 
-                  {/* Overlay Badges */}
-                  <div className="absolute top-4 left-4 flex flex-col gap-3">
-                    {item.popular && (
-                      <div className="flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-xl">
-                        <Star size={16} className="mr-2 fill-current" />
-                        Popular Choice
+                  <div className="absolute top-4 right-4 flex gap-3">
+                    {item.signature && (
+                      <div className="bg-orange-500 text-white rounded-full p-2 shadow-xl" title="Signature">
+                        <Sparkles size={16} />
                       </div>
                     )}
-                  </div>
-
-                  <div className="absolute top-4 right-4 flex gap-3">
                     {item.vegetarian && (
                       <div className="bg-green-500 text-white rounded-full p-2 shadow-xl" title="Vegetarian">
                         <Salad size={16} />

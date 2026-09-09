@@ -8,10 +8,10 @@ export interface ApiMenuItem {
   category: string;
   spicy?: boolean;
   vegetarian?: boolean;
-  popular?: boolean;
+  signature?: boolean;
   status?: string;
-  createdAt?: string; 
-  updatedAt?: string; 
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MenuItem {
@@ -23,9 +23,9 @@ export interface MenuItem {
   image: string;
   spicy?: boolean;
   vegetarian?: boolean;
-  popular?: boolean;
+  signature?: boolean;
   status: 'Available' | 'Unavailable';
-  updatedAt?: string; 
+  updatedAt?: string;
 }
 
 export interface MenuCategory {
@@ -37,4 +37,15 @@ export interface CategoryTab {
   id: string;
   label: string;
   icon: React.ReactNode;
+}
+
+export interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

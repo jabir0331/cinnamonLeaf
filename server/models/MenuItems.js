@@ -32,7 +32,7 @@ const menuItemSchema = new mongoose.Schema(
         vegetarian: {
             type: Boolean
         },
-        popular: {
+        signature: {
             type: Boolean
         },
         status: {

@@ -26,7 +26,7 @@ const MenuManagement: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-  const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
   const [menuData, setMenuData] = useState<Record<string, MenuCategory>>({});
   const [allMenuItems, setAllMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,7 +86,7 @@ const MenuManagement: React.FC = () => {
         category: categories[categoryKey]?.title || 'Starters',
         spicy: item.spicy,
         vegetarian: item.vegetarian,
-        popular: item.popular,
+        signature: item.signature,
         status: item.status === 'Available' ? 'Available' : 'Unavailable',
         updatedAt: item.updatedAt
       };
@@ -297,6 +297,7 @@ const MenuManagement: React.FC = () => {
       {viewMode === 'card' ? (
         <CardView
           items={filteredItems}
+          hasAnyItems={allMenuItems.length > 0}
           onViewDetails={openDetailModal}
           onEditItem={openEditModal}
           onToggleStatus={toggleItemStatus}
@@ -305,6 +306,7 @@ const MenuManagement: React.FC = () => {
       ) : (
         <TableView
           items={filteredItems}
+          hasAnyItems={allMenuItems.length > 0}
           onViewDetails={openDetailModal}
           onEditItem={openEditModal}
           onToggleStatus={toggleItemStatus}
