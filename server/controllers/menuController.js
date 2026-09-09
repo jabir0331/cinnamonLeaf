@@ -55,7 +55,7 @@ exports.createMenuItem = [
         price,
         spicy = false,
         vegetarian = false,
-        popular = false
+        signature = false
       } = req.body;
 
       // Validate required fields
@@ -81,7 +81,7 @@ exports.createMenuItem = [
         image: imagePath,
         spicy: spicy === 'true',
         vegetarian: vegetarian === 'true',
-        popular: popular === 'true',
+        signature: signature === 'true',
         status: 'Available'
       });
 
@@ -144,7 +144,7 @@ exports.updateMenuItem = [
         price,
         spicy = false,
         vegetarian = false,
-        popular = false
+        signature = false
       } = req.body;
 
       // Find existing menu item
@@ -178,7 +178,7 @@ exports.updateMenuItem = [
         image: imagePath,
         spicy: spicy === 'true',
         vegetarian: vegetarian === 'true',
-        popular: popular === 'true'
+        signature: signature === 'true'
       };
 
       const updatedMenuItem = await MenuItem.findByIdAndUpdate(
