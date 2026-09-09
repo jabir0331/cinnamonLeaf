@@ -1,93 +1,93 @@
-// src/pages/admin/CategoryManagement.tsx
+// src/pages/admin/PromotionManagement.tsx
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Plus, X } from 'lucide-react';
-import { getAllCategories, toggleCategoryStatus } from '../../services/categories';
-import { Category } from '../../types/menu';
+import { getAllPromotions, togglePromotionStatus } from '../../services/promotions';
+import { Promotion } from '../../types/menu';
 import LoadingState from '../../components/LoadingState';
 import SearchBar from '../../components/admin/MenuManagement/SearchBar';
 import ViewToggle from '../../components/admin/MenuManagement/ViewToggle';
-import CardView from '../../components/admin/CategoryManagement/CardView';
-import TableView from '../../components/admin/CategoryManagement/TableView';
-import CategoryFormModal from '../../components/admin/CategoryManagement/CategoryFormModal';
+import CardView from '../../components/admin/PromotionManagement/CardView';
+import TableView from '../../components/admin/PromotionManagement/TableView';
+import PromotionFormModal from '../../components/admin/PromotionManagement/PromotionFormModal';
 
-const CategoryManagement: React.FC = () => {
-    const [categories, setCategories] = useState<Category[]>([]);
+const PromotionManagement: React.FC = () => {
+    const [promotions, setPromotions] = useState<Promotion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
     const [showFormModal, setShowFormModal] = useState(false);
-    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-    const [categoryToToggle, setCategoryToToggle] = useState<Category | null>(null);
+    const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
+    const [promotionToToggle, setPromotionToToggle] = useState<Promotion | null>(null);
 
-    const fetchCategories = async () => {
+    const fetchPromotions = async () => {
         try {
-            const data = await getAllCategories();
+            const data = await getAllPromotions();
             if (data.success) {
-                setCategories(data.categories);
+                setPromotions(data.promotions);
             } else {
-                toast.error(data.message || 'Failed to fetch categories');
+                toast.error(data.message || 'Failed to fetch promotions');
             }
         } catch (error) {
-            console.error('Error fetching categories:', error);
-            toast.error('Failed to fetch categories');
+            console.error('Error fetching promotions:', error);
+            toast.error('Failed to fetch promotions');
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchCategories();
+        fetchPromotions();
     }, []);
 
     useEffect(() => {
-        const isAnyModalOpen = showFormModal || !!categoryToToggle;
+        const isAnyModalOpen = showFormModal || !!promotionToToggle;
         document.body.style.overflow = isAnyModalOpen ? 'hidden' : 'auto';
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [showFormModal, categoryToToggle]);
+    }, [showFormModal, promotionToToggle]);
 
-    const filteredCategories = categories.filter((category) => {
+    const filteredPromotions = promotions.filter((promotion) => {
         const term = searchTerm.toLowerCase();
         return (
-            category.name.toLowerCase().includes(term) ||
-            category.description.toLowerCase().includes(term)
+            promotion.title.toLowerCase().includes(term) ||
+            promotion.description.toLowerCase().includes(term)
         );
     });
 
     const openAddModal = () => {
-        setEditingCategory(null);
+        setEditingPromotion(null);
         setShowFormModal(true);
     };
 
-    const openEditModal = (category: Category) => {
-        setEditingCategory(category);
+    const openEditModal = (promotion: Promotion) => {
+        setEditingPromotion(promotion);
         setShowFormModal(true);
     };
 
     const confirmToggleStatus = async () => {
-        if (!categoryToToggle) return;
+        if (!promotionToToggle) return;
         try {
-            const response = await toggleCategoryStatus(categoryToToggle._id);
+            const response = await togglePromotionStatus(promotionToToggle._id);
             if (response.success) {
-                setCategories(prev =>
-                    prev.map(c => c._id === categoryToToggle._id ? { ...c, isActive: !c.isActive } : c)
+                setPromotions(prev =>
+                    prev.map(p => p._id === promotionToToggle._id ? { ...p, isActive: !p.isActive } : p)
                 );
-                toast.success(`Category ${categoryToToggle.isActive ? 'disabled' : 'enabled'} successfully`);
+                toast.success(`Promotion ${promotionToToggle.isActive ? 'disabled' : 'enabled'} successfully`);
             } else {
-                toast.error('Failed to update category status');
+                toast.error('Failed to update promotion status');
             }
         } catch (error) {
-            console.error('Error toggling category status:', error);
-            toast.error('Failed to update category status');
+            console.error('Error toggling promotion status:', error);
+            toast.error('Failed to update promotion status');
         } finally {
-            setCategoryToToggle(null);
+            setPromotionToToggle(null);
         }
     };
 
     if (isLoading) {
-        return <LoadingState message="Loading categories..." subMessage="Fetching category details, please wait a moment" />;
+        return <LoadingState message="Loading promotions..." subMessage="Fetching promotion details, please wait a moment" />;
     }
 
     return (
@@ -96,7 +96,7 @@ const CategoryManagement: React.FC = () => {
                 <SearchBar
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
-                    placeholder="Search categories..."
+                    placeholder="Search promotions..."
                 />
 
                 <div className="flex items-center gap-2">
@@ -111,47 +111,47 @@ const CategoryManagement: React.FC = () => {
                         type="button"
                     >
                         <Plus size={20} />
-                        <span>Add New Category</span>
+                        <span>Add New Promo</span>
                     </button>
                 </div>
             </div>
 
             {viewMode === 'card' ? (
                 <CardView
-                    categories={filteredCategories}
-                    hasAnyCategories={categories.length > 0}
-                    onEditCategory={openEditModal}
-                    onToggleStatus={setCategoryToToggle}
+                    promotions={filteredPromotions}
+                    hasAnyPromotions={promotions.length > 0}
+                    onEditPromotion={openEditModal}
+                    onToggleStatus={setPromotionToToggle}
                 />
             ) : (
                 <TableView
-                    categories={filteredCategories}
-                    hasAnyCategories={categories.length > 0}
-                    onEditCategory={openEditModal}
-                    onToggleStatus={setCategoryToToggle}
+                    promotions={filteredPromotions}
+                    hasAnyPromotions={promotions.length > 0}
+                    onEditPromotion={openEditModal}
+                    onToggleStatus={setPromotionToToggle}
                 />
             )}
 
-            <CategoryFormModal
+            <PromotionFormModal
                 isOpen={showFormModal}
-                category={editingCategory}
+                promotion={editingPromotion}
                 onClose={() => setShowFormModal(false)}
-                onSaved={fetchCategories}
+                onSaved={fetchPromotions}
             />
 
-            {categoryToToggle && (
+            {promotionToToggle && (
                 <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
                     style={{ top: '-5rem', height: 'calc(100vh + 5rem)' }}
-                    onClick={(e) => e.target === e.currentTarget && setCategoryToToggle(null)}
+                    onClick={(e) => e.target === e.currentTarget && setPromotionToToggle(null)}
                 >
                     <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200 mt-7">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100">
                             <h2 className="text-lg font-semibold text-gray-900">
-                                {categoryToToggle.isActive ? 'Disable' : 'Enable'} Category
+                                {promotionToToggle.isActive ? 'Disable' : 'Enable'} Promotion
                             </h2>
                             <button
-                                onClick={() => setCategoryToToggle(null)}
+                                onClick={() => setPromotionToToggle(null)}
                                 className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-all duration-200"
                                 type="button"
                             >
@@ -160,16 +160,16 @@ const CategoryManagement: React.FC = () => {
                         </div>
                         <div className="p-6">
                             <p className="text-gray-900 font-medium mb-2">
-                                Are you sure you want to {categoryToToggle.isActive ? 'disable' : 'enable'} "{categoryToToggle.name}"?
+                                Are you sure you want to {promotionToToggle.isActive ? 'disable' : 'enable'} "{promotionToToggle.title}"?
                             </p>
                             <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                                {categoryToToggle.isActive
-                                    ? 'It will no longer appear on the homepage or in the admin category dropdown for new menu items.'
-                                    : 'It will become available again on the homepage and in the admin category dropdown.'}
+                                {promotionToToggle.isActive
+                                    ? 'It will no longer appear on the customer-facing promotions page.'
+                                    : 'It will become visible again on the customer-facing promotions page.'}
                             </p>
                             <div className="flex gap-3">
                                 <button
-                                    onClick={() => setCategoryToToggle(null)}
+                                    onClick={() => setPromotionToToggle(null)}
                                     className="flex-1 px-4 py-3 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-xl font-medium transition-all duration-200 border border-gray-200"
                                     type="button"
                                 >
@@ -177,13 +177,13 @@ const CategoryManagement: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={confirmToggleStatus}
-                                    className={`flex-1 px-4 py-3 text-white rounded-xl font-medium transition-all duration-200 shadow-sm ${categoryToToggle.isActive
+                                    className={`flex-1 px-4 py-3 text-white rounded-xl font-medium transition-all duration-200 shadow-sm ${promotionToToggle.isActive
                                         ? 'bg-red-600 hover:bg-red-700'
                                         : 'bg-emerald-600 hover:bg-emerald-700'
                                         }`}
                                     type="button"
                                 >
-                                    {categoryToToggle.isActive ? 'Disable' : 'Enable'}
+                                    {promotionToToggle.isActive ? 'Disable' : 'Enable'}
                                 </button>
                             </div>
                         </div>
@@ -194,4 +194,4 @@ const CategoryManagement: React.FC = () => {
     );
 };
 
-export default CategoryManagement;
+export default PromotionManagement;

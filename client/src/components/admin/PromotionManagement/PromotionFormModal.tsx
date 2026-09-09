@@ -1,32 +1,41 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Save, Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { Category } from '../../../types/menu';
-import { createCategory, updateCategory } from '../../../services/categories';
+import { Promotion } from '../../../types/menu';
+import { createPromotion, updatePromotion } from '../../../services/promotions';
 import { getImageUrl } from '../../../utils/imageUrl';
 
-interface CategoryFormModalProps {
+interface PromotionFormModalProps {
     isOpen: boolean;
-    category: Category | null; // null = add mode, otherwise edit mode
+    promotion: Promotion | null; // null = add mode, otherwise edit mode
     onClose: () => void;
     onSaved: () => void;
 }
 
 interface FormDataState {
-    name: string;
+    title: string;
     description: string;
+    badgeText: string;
+    validUntil: string;
     image: File | string;
 }
 
 const emptyForm: FormDataState = {
-    name: '',
+    title: '',
     description: '',
+    badgeText: '',
+    validUntil: '',
     image: ''
 };
 
-const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
+const toDateInputValue = (validUntil?: string) => {
+    if (!validUntil) return '';
+    return new Date(validUntil).toISOString().slice(0, 10);
+};
+
+const PromotionFormModal: React.FC<PromotionFormModalProps> = ({
     isOpen,
-    category,
+    promotion,
     onClose,
     onSaved
 }) => {
@@ -36,21 +45,23 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const isEditMode = !!category;
+    const isEditMode = !!promotion;
 
     useEffect(() => {
-        if (category) {
+        if (promotion) {
             setFormData({
-                name: category.name,
-                description: category.description || '',
-                image: category.image || ''
+                title: promotion.title,
+                description: promotion.description || '',
+                badgeText: promotion.badgeText || '',
+                validUntil: toDateInputValue(promotion.validUntil),
+                image: promotion.image || ''
             });
-            setPreviewImage(getImageUrl(category.image) || '');
+            setPreviewImage(getImageUrl(promotion.image) || '');
         } else {
             setFormData(emptyForm);
             setPreviewImage('');
         }
-    }, [category, isOpen]);
+    }, [promotion, isOpen]);
 
     if (!isOpen) return null;
 
@@ -88,7 +99,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.name || !formData.description) {
+        if (!formData.title || !formData.description) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -96,27 +107,29 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         setIsSubmitting(true);
         try {
             const submitData = new FormData();
-            submitData.append('name', formData.name);
+            submitData.append('title', formData.title);
             submitData.append('description', formData.description);
+            submitData.append('badgeText', formData.badgeText);
+            submitData.append('validUntil', formData.validUntil);
 
             if (formData.image instanceof File) {
                 submitData.append('image', formData.image);
             }
 
             const response = isEditMode
-                ? await updateCategory(category!._id, submitData)
-                : await createCategory(submitData);
+                ? await updatePromotion(promotion!._id, submitData)
+                : await createPromotion(submitData);
 
             if (response.success) {
-                toast.success(`Category ${isEditMode ? 'updated' : 'created'} successfully!`);
+                toast.success(`Promotion ${isEditMode ? 'updated' : 'created'} successfully!`);
                 onSaved();
                 onClose();
             } else {
-                toast.error(response.message || 'Failed to save category');
+                toast.error(response.message || 'Failed to save promotion');
             }
         } catch (error: any) {
-            console.error('Error saving category:', error);
-            toast.error(error.response?.data?.message || 'Failed to save category');
+            console.error('Error saving promotion:', error);
+            toast.error(error.response?.data?.message || 'Failed to save promotion');
         } finally {
             setIsSubmitting(false);
         }
@@ -130,10 +143,10 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                         <div className="flex items-center justify-between">
                             <div>
                                 <h3 className="text-3xl font-display font-bold text-warm-brown-800 mb-1">
-                                    {isEditMode ? 'Edit Category' : 'Add New Category'}
+                                    {isEditMode ? 'Edit Promotion' : 'Add New Promotion'}
                                 </h3>
                                 <p className="text-sage-green-600 font-body">
-                                    {isEditMode ? 'Update this category\'s details' : 'Create a new menu category'}
+                                    {isEditMode ? 'Update this promotion\'s details' : 'Create a new offer for customers'}
                                 </p>
                             </div>
                             <button
@@ -149,14 +162,14 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                     <div className="p-8 overflow-y-auto max-h-[calc(95vh-180px)]">
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-2 font-body">Name *</label>
+                                <label className="block text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-2 font-body">Title *</label>
                                 <input
                                     type="text"
-                                    name="name"
-                                    value={formData.name}
+                                    name="title"
+                                    value={formData.title}
                                     onChange={handleInputChange}
                                     className="w-full px-4 py-3 border border-warm-brown-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-green-500 focus:border-transparent transition-all font-body"
-                                    placeholder="e.g. Starters"
+                                    placeholder="e.g. Weekday Lunch Special"
                                     required
                                 />
                             </div>
@@ -169,13 +182,38 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                                     onChange={handleInputChange}
                                     rows={3}
                                     className="w-full px-4 py-3 border border-warm-brown-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-green-500 focus:border-transparent transition-all font-body resize-none"
-                                    placeholder="Short description shown on the homepage..."
+                                    placeholder="20% off every main course, Monday to Friday, 12-3pm."
                                     required
                                 />
                             </div>
 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-2 font-body">Badge Text</label>
+                                    <input
+                                        type="text"
+                                        name="badgeText"
+                                        value={formData.badgeText}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border border-warm-brown-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-green-500 focus:border-transparent transition-all font-body"
+                                        placeholder="e.g. 20% OFF"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-2 font-body">Valid Until</label>
+                                    <input
+                                        type="date"
+                                        name="validUntil"
+                                        value={formData.validUntil}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border border-warm-brown-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-green-500 focus:border-transparent transition-all font-body"
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1 font-body">Leave blank for an ongoing offer</p>
+                                </div>
+                            </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-3 font-body">Category Image</label>
+                                <label className="block text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-3 font-body">Promotion Image</label>
                                 <div
                                     className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200 ${dragActive
                                         ? 'border-sage-green-400 bg-sage-green-50'
@@ -248,7 +286,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                                 ) : (
                                     <>
                                         <Plus size={20} />
-                                        Add Category
+                                        Add Promotion
                                     </>
                                 )}
                             </button>
@@ -260,4 +298,4 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
     );
 };
 
-export default CategoryFormModal;
+export default PromotionFormModal;

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Heart, Users, Leaf, Clock } from 'lucide-react';
-import restaurantImg from '../assets/images/aboutUs/restaurantImg1.jpg'
+import restaurantImg from '../assets/images/aboutUs/restaurantImg1.png'
 import founderImg from '../assets/images/aboutUs/founder.jpg'
 import cheifChefImg from '../assets/images/aboutUs/chiefChef.jpg'
 import sousChefImg from '../assets/images/aboutUs/sousChef.jpg'
@@ -10,29 +9,7 @@ import desertSpecialistImg from '../assets/images/aboutUs/desertSpecialist.jpg'
 
 
 const About: React.FC = () => {
-  const values = [
-    {
-      icon: <Heart className="w-8 h-8 text-sage-green-600" />,
-      title: "Passion for Food",
-      description: "Every dish is crafted with love and attention to detail, ensuring exceptional flavors in every bite."
-    },
-    {
-      icon: <Leaf className="w-8 h-8 text-sage-green-600" />,
-      title: "Fresh Ingredients",
-      description: "We source the finest local and seasonal ingredients to create dishes that celebrate natural flavors."
-    },
-    {
-      icon: <Users className="w-8 h-8 text-sage-green-600" />,
-      title: "Community Focus",
-      description: "Building connections through food, bringing families and friends together around our table."
-    },
-    {
-      icon: <Clock className="w-8 h-8 text-sage-green-600" />,
-      title: "Time-Honored Traditions",
-      description: "Blending traditional cooking methods with modern innovation to create memorable dining experiences."
-    }
-  ];
-
+ 
   return (
     <div>
 
@@ -68,41 +45,6 @@ const About: React.FC = () => {
               <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-sage-green-500 rounded-full opacity-20"></div>
               <div className="absolute -top-6 -right-6 w-24 h-24 bg-warm-brown-400 rounded-full opacity-20"></div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-20 bg-cream-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left mb-10">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-6">
-              Our Values
-            </h2>
-            <p className="font-body text-lg text-warm-brown-600 max-w-6xl ">
-              These core principles guide everything we do, from selecting ingredients
-              to creating memorable dining experiences.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {values.map((value, index) => (
-              <div key={index} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    {value.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-body text-xl font-semibold text-warm-brown-700 mb-3">
-                      {value.title}
-                    </h3>
-                    <p className="font-body text-warm-brown-600">
-                      {value.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
