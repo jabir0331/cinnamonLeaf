@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sofa, ChefHat, Handshake, Star } from 'lucide-react'
+import { Sofa, ChefHat, Handshake } from 'lucide-react'
 import landingImg from '../assets/images/heroBg.jpg';
-import signatureDish1 from '../assets/images/signatureDishes/herbCrustedSalmon.jpg';
-import signatureDish2 from '../assets/images/signatureDishes/truffleMushroomRisotto.jpg'
-import signatureDish3 from '../assets/images/signatureDishes/lavaCake.jpg'
 import { getAllCategories } from '../services/categories';
-import { Category } from '../types/menu';
+import { getAllMenuItems } from '../services/menuItems';
+import { Category, MenuItem } from '../types/menu';
 import { getImageUrl } from '../utils/imageUrl';
 
 // Fisher-Yates shuffle, so every active category has a fair chance of
@@ -22,6 +20,7 @@ const shuffle = <T,>(items: T[]): T[] => {
 
 const Home: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [signatureDishes, setSignatureDishes] = useState<MenuItem[]>([]);
 
   useEffect(() => {
     getAllCategories()
@@ -32,23 +31,34 @@ const Home: React.FC = () => {
         }
       })
       .catch((err: unknown) => console.error('Error fetching categories:', err));
+
+    getAllMenuItems()
+      .then((data) => {
+        if (data.success) {
+          const signature = data.menuItems.filter(
+            (item: MenuItem) => item.signature && item.status === 'Available'
+          );
+          setSignatureDishes(signature.slice(0, 3));
+        }
+      })
+      .catch((err: unknown) => console.error('Error fetching signature dishes:', err));
   }, []);
 
   const features = [
     {
       icon: <Sofa className="w-8 h-8 text-sage-green-600" />,
       title: "Unforgettable Atmosphere",
-      description: "Step into a warm, elegant setting where every detail is designed perfect for romantic dinners, family gatherings, or special occasions."
+      description: "Enjoy a warm, elegant setting perfect for romantic dinners, family gatherings, and special occasions."
     },
     {
       icon: <ChefHat className="w-8 h-8 text-sage-green-600" />,
       title: "Inspired Culinary Creations",
-      description: "Our chefs craft each dish with passion and precision, blending traditional flavors with modern flair to create a menu that excites every palate."
+      description: "Savour traditional flavours blended with modern flair in dishes crafted to excite every palate."
     },
     {
       icon: <Handshake className="w-8 h-8 text-sage-green-600" />,
       title: "Exceptional Service, Every Time",
-      description: "From the moment you arrive to the last bite, our attentive team ensures your experience is seamless, personalized, and truly memorable."
+      description: "Experience attentive service that makes every visit seamless, personalized, and truly memorable."
     }
   ];
 
@@ -80,16 +90,16 @@ const Home: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/reservation"
+              to="/menu"
               className="bg-warm-brown-700 text-white px-12 py-3 rounded-full font-body font-semibold text-lg hover:bg-white hover:text-warm-brown-700 transition-colors duration-200"
             >
-              Reserve a Table
+              View Menu
             </Link>
             <Link
-              to="/menu"
+              to="/contact"
               className="border-2 border-white text-white px-12 py-3 rounded-full font-body font-semibold text-lg hover:bg-white hover:text-warm-brown-700 transition-colors duration-200"
             >
-              View Menu
+              Visit Us
             </Link>
           </div>
         </div>
@@ -141,6 +151,52 @@ const Home: React.FC = () => {
         </section>
       )}
 
+      {/* Signature Dishes */}
+      {signatureDishes.length > 0 && (
+        <section className="mt-20 py-15 bg-cream-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-left mb-10">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
+                Our Signature Dishes
+              </h2>
+              <p className="font-body text-lg text-warm-brown-600">
+                Discover our chef’s favorite creations, crafted with passion, bursting with flavor, and guaranteed to delight your palate
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {signatureDishes.map((dish) => (
+                <div key={dish._id} className="group cursor-pointer">
+                  <div className="relative overflow-hidden rounded-2xl mb-6">
+                    <img
+                      src={getImageUrl(dish.image)}
+                      alt={dish.name}
+                      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <h3 className="font-body text-xl font-semibold text-warm-brown-700 mb-2">
+                    {dish.name}
+                  </h3>
+                  <p className="font-body text-warm-brown-600">
+                    {dish.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-right mt-12">
+              <Link
+                to="/menu"
+                className="bg-sage-green-600 text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-sage-green-700 transition-colors duration-200"
+              >
+                View Full Menu
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Features Section */}
       <section className="mt-20 py-15 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -167,155 +223,6 @@ const Home: React.FC = () => {
                 </p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Signature Dishes */}
-      <section className="mt-20 py-15 bg-cream-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left mb-10">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
-              Signature Dishes
-            </h2>
-            <p className="font-body text-lg text-warm-brown-600">
-              Discover our chef’s favorite creations — crafted with passion, bursting with flavor, and guaranteed to delight your palate.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="group cursor-pointer">
-              <div className="relative overflow-hidden rounded-2xl mb-6">
-                <img 
-                  src= {signatureDish1}
-                  alt="Grilled Salmon"
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-              <h3 className="font-body text-xl font-semibold text-warm-brown-700 mb-2">
-                Herb-Crusted Salmon
-              </h3>
-              <p className="font-body text-warm-brown-600">
-                Fresh Atlantic salmon with aromatic herbs and seasonal vegetables
-              </p>
-            </div>
-
-            <div className="group cursor-pointer">
-              <div className="relative overflow-hidden rounded-2xl mb-6">
-                <img 
-                  src= {signatureDish2}
-                  alt="Pasta Dish"
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-              <h3 className="font-body text-xl font-semibold text-warm-brown-700 mb-2">
-                Truffle Mushroom Risotto
-              </h3>
-              <p className="font-body text-warm-brown-600">
-                Creamy arborio rice with wild mushrooms and truffle oil
-              </p>
-            </div>
-
-            <div className="group cursor-pointer">
-              <div className="relative overflow-hidden rounded-2xl mb-6">
-                <img 
-                  src= {signatureDish3}
-                  alt="Chocolate Dessert"
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-              <h3 className="font-body text-xl font-semibold text-warm-brown-700 mb-2">
-                Chocolate Lava Cake
-              </h3>
-              <p className="font-body text-warm-brown-600">
-                Warm chocolate cake with molten center and vanilla ice cream
-              </p>
-            </div>
-          </div>
-
-          <div className="text-right mt-12">
-            <Link
-              to="/menu"
-              className="bg-sage-green-600 text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-sage-green-700 transition-colors duration-200"
-            >
-              View Full Menu
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Reviews Preview */}
-      <section className="mt-20 py-15 bg-cream-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left mb-10">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
-              What Our Guests Say
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="font-body text-warm-brown-600 mb-4">
-                "The atmosphere is cozy and the food is exceptional. The herb-crusted salmon 
-                was perfectly cooked and the service was outstanding."
-              </p>
-              <div className="font-body font-semibold text-warm-brown-700">
-                Amal Gunarathna
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="font-body text-warm-brown-600 mb-4">
-                "Perfect spot for a family dinner. The kids loved their meals and we 
-                enjoyed the fusion dishes. Will definitely be back!"
-              </p>
-              <div className="font-body font-semibold text-warm-brown-700">
-                Pathum Nissanka
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="font-body text-warm-brown-600 mb-4">
-                "As a tourist, I was looking for authentic local cuisine. Cinnamon Leaf 
-                exceeded my expectations with their creative fusion dishes."
-              </p>
-              <div className="font-body font-semibold text-warm-brown-700">
-                Alex Carey
-              </div>
-            </div>
-          </div>
-
-          <div className="text-right mt-12">
-            <Link
-              to="/testimonials"
-              className="bg-sage-green-600 text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-sage-green-700 transition-colors duration-300"
-            >
-              Read More Reviews
-            </Link>
           </div>
         </div>
       </section>
