@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Salad, ChefHat, IceCream, Coffee, Plus } from 'lucide-react';
+import { Salad, ChefHat, IceCream, Coffee, Plus, Flame, Sparkles } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,7 +25,7 @@ interface ApiMenuItem {
   category: string;
   spicy?: boolean;
   vegetarian?: boolean;
-  popular?: boolean;
+  signature?: boolean;
 }
 
 interface MenuItem {
@@ -35,7 +35,7 @@ interface MenuItem {
   image: any; // Imported image module
   spicy?: boolean;
   vegetarian?: boolean;
-  popular?: boolean;
+  signature?: boolean;
 }
 
 interface MenuCategory {
@@ -137,7 +137,7 @@ const Menu: React.FC = () => {
           image: item.image, // Fallback if image not found
           spicy: item.spicy,
           vegetarian: item.vegetarian,
-          popular: item.popular
+          signature: item.signature
         });
       }
     });
@@ -422,18 +422,21 @@ const Menu: React.FC = () => {
                               {item.name}
                             </h3>
                             <div className="flex space-x-2">
-                              {item.popular && (
-                                <span className="bg-sage-green-100 text-sage-green-700 text-xs px-2 py-1 rounded-full font-medium">
-                                  Popular
+                              {item.signature && (
+                                <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full font-medium">
+                                  <Sparkles size={12} />
+                                  Signature
                                 </span>
                               )}
                               {item.spicy && (
-                                <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                                <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                                  <Flame size={12} />
                                   Spicy
                                 </span>
                               )}
                               {item.vegetarian && (
-                                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                  <Salad size={12} />
                                   Vegetarian
                                 </span>
                               )}
