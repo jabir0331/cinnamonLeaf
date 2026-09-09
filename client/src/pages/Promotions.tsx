@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Megaphone } from 'lucide-react';
+import { Megaphone, X } from 'lucide-react';
 import { getAllPromotions } from '../services/promotions';
 import { Promotion } from '../types/menu';
 import { getImageUrl } from '../utils/imageUrl';
@@ -14,6 +14,7 @@ const formatValidUntil = (validUntil?: string) => {
 const Promotions: React.FC = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
 
   useEffect(() => {
     getAllPromotions()
@@ -54,15 +55,22 @@ const Promotions: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={`grid gap-8 ${
+              promotions.length <= 2
+                ? 'grid-cols-1 md:grid-cols-2'
+                : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            }`}>
               {promotions.map((promotion) => (
                 <div key={promotion._id} className="flex flex-col">
-                  <div className="relative rounded-2xl overflow-hidden mb-6 h-64 bg-gradient-to-br from-cream-100 to-sage-green-100 flex items-center justify-center">
+                  <div
+                    className={`relative rounded-2xl overflow-hidden mb-6 ${promotions.length <= 2 ? 'h-96' : 'h-64'} bg-gradient-to-br from-cream-100 to-sage-green-100 flex items-center justify-center group ${promotion.image ? 'cursor-pointer' : ''}`}
+                    onClick={() => promotion.image && setSelectedPromotion(promotion)}
+                  >
                     {promotion.image ? (
                       <img
                         src={getImageUrl(promotion.image)}
                         alt={promotion.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <Megaphone size={48} className="text-sage-green-300" />
@@ -82,6 +90,29 @@ const Promotions: React.FC = () => {
           )}
         </div>
       </section>
+
+      {selectedPromotion && selectedPromotion.image && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+          <div className="relative max-w-4xl max-h-[90vh] w-full">
+            <button
+              onClick={() => setSelectedPromotion(null)}
+              className="absolute top-4 right-4 z-10 bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={getImageUrl(selectedPromotion.image)}
+              alt={selectedPromotion.title}
+              className="w-full h-full object-contain rounded-lg"
+            />
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/70 to-transparent rounded-b-lg pointer-events-none" />
+            <div className="absolute bottom-4 left-4 right-4 text-white text-right">
+              <h3 className="font-body font-semibold text-lg mb-1">{selectedPromotion.title}</h3>
+              <p className="font-body text-cream-200">{formatValidUntil(selectedPromotion.validUntil)}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
