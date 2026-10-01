@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { toast } from 'react-toastify';
-import { signupUser } from '../services/auth';
+import { signupUser, googleAuth } from '../services/auth';
 import logo from "../assets/images/cinnamonLeafLogo.png"
 import loginBackground from "../assets/images/loginBg.png";
 
@@ -106,8 +107,9 @@ const SignupPage: React.FC = () => {
       toast.success('Account created successfully!');
       console.log('Signup response:', data);
 
-      // Optionally store token in localStorage
+      // Store session in localStorage (same keys as login)
       localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.user?.role || 'user');
 
       // Reset form
       setFormData({
@@ -134,6 +136,27 @@ const SignupPage: React.FC = () => {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      toast.error('Google sign-in failed. Please try again.');
+      return;
+    }
+
+    try {
+      const data = await googleAuth(credentialResponse.credential);
+
+      toast.success('Account created successfully!');
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.user?.role || 'user');
+
+      navigate(data.user?.role === 'admin' ? "/admin/dashboard" : "/");
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Google sign-in failed');
+      console.error(err);
     }
   };
 
@@ -315,6 +338,28 @@ const SignupPage: React.FC = () => {
               'Create Account'
             )}
           </button>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-sage-green-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-sage-green-500 font-body">or</span>
+            </div>
+          </div>
+
+          {/* Social Signup */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error('Google sign-in failed. Please try again.')}
+              theme="outline"
+              shape="pill"
+              width="320"
+              text="signup_with"
+            />
+          </div>
 
           {/* Sign In Link */}
           <div className="text-center">

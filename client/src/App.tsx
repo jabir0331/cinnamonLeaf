@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import PageTitle from './components/PageTitle';
+import IdleLogoutWatcher from './components/IdleLogoutWatcher';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -34,6 +35,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-cream-50">
         <PageTitle />
+        <IdleLogoutWatcher />
         <ToastContainer
           position="top-right"
           autoClose={3000}
