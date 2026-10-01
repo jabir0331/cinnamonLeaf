@@ -1,10 +1,11 @@
 // client/src/pages/SignupPage.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Mail, Phone, Lock, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { signupUser } from '../services/auth';
 import logo from "../assets/images/cinnamonLeafLogo.png"
+import loginBackground from "../assets/images/loginBg.png";
 
 interface FormData {
   name: string;
@@ -25,7 +26,7 @@ interface FormErrors {
 const SignupPage: React.FC = () => {
 
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -138,8 +139,11 @@ const SignupPage: React.FC = () => {
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-sage-green-50 flex items-center justify-center p-4">
-     
+    <div
+      className="min-h-screen flex items-center justify-center p-4 bg-cover bg-left-top bg-no-repeat"
+      style={{ backgroundImage: `url(${loginBackground})` }}
+    >
+
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-8 border border-sage-green-100">
         {/* Header */}
         <div className="text-center mb-8">
@@ -173,7 +177,7 @@ const SignupPage: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.name ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.name ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                   }`}
                 placeholder="Enter your full name"
               />
@@ -198,7 +202,7 @@ const SignupPage: React.FC = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.email ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.email ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="your@email.com"
                 />
@@ -221,7 +225,7 @@ const SignupPage: React.FC = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.phone ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.phone ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="+94 71 123 4567"
                 />
@@ -247,7 +251,7 @@ const SignupPage: React.FC = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.password ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.password ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="••••••••"
                 />
@@ -277,7 +281,7 @@ const SignupPage: React.FC = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="••••••••"
                 />
