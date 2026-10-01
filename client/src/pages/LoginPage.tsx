@@ -5,6 +5,7 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { loginUser } from '../services/auth';
 import logo from "../assets/images/cinnamonLeafLogo.png"
+import loginBackground from "../assets/images/loginBg.png";
 
 interface FormData {
     email: string;
@@ -97,8 +98,11 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-cream-50 to-sage-green-50 flex items-center justify-center p-4">
-           
+        <div
+            className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${loginBackground})` }}
+        >
+
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 border border-sage-green-100">
                 {/* Header */}
                 <div className="text-center mb-8">

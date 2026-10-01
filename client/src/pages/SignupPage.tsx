@@ -1,10 +1,11 @@
 // client/src/pages/SignupPage.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Mail, Phone, Lock, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { signupUser } from '../services/auth';
 import logo from "../assets/images/cinnamonLeafLogo.png"
+import loginBackground from "../assets/images/loginBg.png";
 
 interface FormData {
   name: string;
@@ -25,7 +26,7 @@ interface FormErrors {
 const SignupPage: React.FC = () => {
 
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -138,8 +139,11 @@ const SignupPage: React.FC = () => {
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-sage-green-50 flex items-center justify-center p-4">
-     
+    <div
+      className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${loginBackground})` }}
+    >
+
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-8 border border-sage-green-100">
         {/* Header */}
         <div className="text-center mb-8">
