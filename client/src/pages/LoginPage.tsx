@@ -99,7 +99,7 @@ const LoginPage: React.FC = () => {
 
     return (
         <div
-            className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+            className="min-h-screen flex items-center justify-center p-4 bg-cover bg-left-top bg-no-repeat"
             style={{ backgroundImage: `url(${loginBackground})` }}
         >
 
@@ -135,7 +135,7 @@ const LoginPage: React.FC = () => {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleInputChange}
-                                className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.email ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                                className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.email ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                                     }`}
                                 placeholder="your@email.com"
                             />
@@ -158,7 +158,7 @@ const LoginPage: React.FC = () => {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.password ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                                className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.password ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                                     }`}
                                 placeholder="Enter your password"
                             />
@@ -173,15 +173,16 @@ const LoginPage: React.FC = () => {
                     </div>
 
                     {/* Remember Me & Forgot Password */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <label className="flex items-center">
+                            
+                            <span className="text-sm text-sage-green-600 font-body">Remember me</span>
                             <input
                                 type="checkbox"
                                 checked={rememberMe}
                                 onChange={(e) => setRememberMe(e.target.checked)}
-                                className="w-4 h-4 text-warm-brown-600 bg-cream-50 border-sage-green-300 rounded focus:ring-warm-brown-500 focus:ring-2"
+                                className="ml-2 w-4 h-4 text-warm-brown-600 bg-cream-50 border-sage-green-300 rounded focus:ring-warm-brown-500 focus:ring-2"
                             />
-                            <span className="ml-2 text-sm text-sage-green-600 font-body">Remember me</span>
                         </label>
                         <button
                             type="button"

@@ -140,7 +140,7 @@ const SignupPage: React.FC = () => {
   return (
 
     <div
-      className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+      className="min-h-screen flex items-center justify-center p-4 bg-cover bg-left-top bg-no-repeat"
       style={{ backgroundImage: `url(${loginBackground})` }}
     >
 
@@ -177,7 +177,7 @@ const SignupPage: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.name ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.name ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                   }`}
                 placeholder="Enter your full name"
               />
@@ -202,7 +202,7 @@ const SignupPage: React.FC = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.email ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.email ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="your@email.com"
                 />
@@ -225,7 +225,7 @@ const SignupPage: React.FC = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.phone ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-4 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.phone ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="+94 71 123 4567"
                 />
@@ -251,7 +251,7 @@ const SignupPage: React.FC = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.password ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.password ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="••••••••"
                 />
@@ -281,7 +281,7 @@ const SignupPage: React.FC = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
+                  className={`w-full pl-11 pr-11 py-3 text-sm border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-warm-brown-500 focus:border-transparent transition-all ${errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-sage-green-200 bg-cream-50'
                     }`}
                   placeholder="••••••••"
                 />
