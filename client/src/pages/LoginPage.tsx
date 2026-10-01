@@ -1,7 +1,7 @@
 // client/src/pages/LoginPage.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { toast } from 'react-toastify';
 import { loginUser, googleAuth } from '../services/auth';
@@ -30,7 +30,6 @@ const LoginPage: React.FC = () => {
     const [errors, setErrors] = useState<FormErrors>({});
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
 
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {};
@@ -128,8 +127,16 @@ const LoginPage: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 border border-sage-green-100">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-warm-brown-100 rounded-full mb-4">
-                        <img src={logo} alt="Cinnamon Leaf Logo" className='rounded-full' />
+                    <div className="relative flex items-center justify-center mb-4">
+                        <Link
+                            to="/"
+                            className="absolute left-0 inline-flex items-center justify-center w-10 h-10 bg-cream-100 hover:bg-cream-200 rounded-full transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5 text-warm-brown-700" />
+                        </Link>
+                        <div className="inline-flex items-center justify-center w-20 h-20 bg-warm-brown-100 rounded-full">
+                            <img src={logo} alt="Cinnamon Leaf Logo" className='rounded-full' />
+                        </div>
                     </div>
                     <h1 className="text-3xl font-display font-bold text-warm-brown-800 mb-2">
                         Welcome Back
@@ -192,26 +199,6 @@ const LoginPage: React.FC = () => {
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                         </div>
-                    </div>
-
-                    {/* Remember Me & Forgot Password */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <label className="flex items-center">
-                            
-                            <span className="text-sm text-sage-green-600 font-body">Remember me</span>
-                            <input
-                                type="checkbox"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
-                                className="ml-2 w-4 h-4 text-warm-brown-600 bg-cream-50 border-sage-green-300 rounded focus:ring-warm-brown-500 focus:ring-2"
-                            />
-                        </label>
-                        <button
-                            type="button"
-                            className="text-sm text-warm-brown-600 hover:text-warm-brown-700 font-semibold transition-colors hover:underline"
-                        >
-                            Forgot password?
-                        </button>
                     </div>
 
                     {/* Submit Button */}
