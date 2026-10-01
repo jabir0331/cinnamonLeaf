@@ -13,6 +13,11 @@ export const loginUser = async (formData: any) => {
   return response.data;
 };
 
+export const googleAuth = async (credential: string) => {
+  const response = await axios.post(`${API_URL}/auth/google`, { credential });
+  return response.data;
+};
+
 export const logoutUser = async (token: string) => {
   const response = await axios.post(
     `${API_URL}/auth/logout`,
