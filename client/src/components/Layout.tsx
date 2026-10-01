@@ -176,7 +176,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      <Footer />
+      <Footer navLinks={navLinks} />
     </div>
   );
 };

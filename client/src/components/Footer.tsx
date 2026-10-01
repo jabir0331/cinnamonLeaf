@@ -1,21 +1,23 @@
+import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
 import './Footer.css'
 import logo from '../assets/images/cinnamonLeafLogo.png'
 
-const Footer = () => {
+interface NavLink {
+  path: string;
+  label: string;
+}
+
+interface FooterProps {
+  navLinks: NavLink[];
+}
+
+const Footer: React.FC<FooterProps> = ({ navLinks }) => {
   const currentYear = new Date().getFullYear();
-  
+
   const socialLinks = [
     { icon: Facebook, href: "#", label: "Facebook" },
     { icon: Instagram, href: "#", label: "Instagram" }
-  ];
-
-  const quickLinks = [
-    { label: "Home", href: "#" },
-    { label: "Menu", href: "#menu" },
-    { label: "About", href: "#about" },
-    { label: "Contact", href: "#contact" },
-    { label: "Reservations", href: "#reservations" }
   ];
 
   return (
@@ -73,17 +75,17 @@ const Footer = () => {
               <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-cream-400 to-transparent rounded"></div>
             </h3>
             <ul className="space-y-0">
-              {quickLinks.map(({ label, href }) => (
-                <li key={label}>
-                  <a 
-                    href={href} 
+              {navLinks.map(({ label, path }) => (
+                <li key={path}>
+                  <Link
+                    to={path}
                     className="group inline-block text-cream-200 hover:text-cream-400 transition-all duration-300 ease-out text-sm py-2 relative"
                   >
                     <span className="relative">
                       {label}
                       <div className="absolute left-0 -bottom-1 w-0 h-0.5 bg-cream-400 group-hover:w-full transition-all duration-300"></div>
                     </span>
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
