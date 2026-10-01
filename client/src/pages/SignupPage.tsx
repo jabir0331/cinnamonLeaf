@@ -1,7 +1,7 @@
 // client/src/pages/SignupPage.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { toast } from 'react-toastify';
 import { signupUser, googleAuth } from '../services/auth';
@@ -170,9 +170,17 @@ const SignupPage: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-8 border border-sage-green-100">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-warm-brown-100 rounded-full mb-4">
-            {/* <UserPlus className="w-8 h-8 text-warm-brown-600" /> */}
-            <img src={logo} alt="Cinnamon Leaf Logo" className='rounded-full' />
+          <div className="relative flex items-center justify-center mb-4">
+            <Link
+              to="/"
+              className="absolute left-0 inline-flex items-center justify-center w-10 h-10 bg-cream-100 hover:bg-cream-200 rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-warm-brown-700" />
+            </Link>
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-warm-brown-100 rounded-full">
+              {/* <UserPlus className="w-8 h-8 text-warm-brown-600" /> */}
+              <img src={logo} alt="Cinnamon Leaf Logo" className='rounded-full' />
+            </div>
           </div>
           <h1 className="text-3xl font-display font-bold text-warm-brown-800 mb-2">
             Create Account
