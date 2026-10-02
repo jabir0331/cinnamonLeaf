@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Salad, ChefHat, IceCream, Coffee, Plus, Flame, Sparkles } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
@@ -24,6 +24,7 @@ interface ApiMenuItem {
   price: number;
   image: string;
   category: string;
+  status?: string;
   spicy?: boolean;
   vegetarian?: boolean;
   signature?: boolean;
@@ -61,6 +62,8 @@ const mapCategoryNameToKey = (categoryName: string): string => {
 const Menu: React.FC = () => {
 
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [menuData, setMenuData] = useState<Record<string, MenuCategory>>({});
   const [isLoading, setIsLoading] = useState(true);
 
@@ -85,8 +88,19 @@ const Menu: React.FC = () => {
     updateQuantity,
     clearCart,
     getTotalPrice,
-    getTotalItems
+    getTotalItems,
+    syncWithMenu
   } = useCart();
+
+  // Coming back from login with a saved cart: reopen it so checkout is one click away
+  useEffect(() => {
+    const state = location.state as { resumeCheckout?: boolean } | null;
+    if (state?.resumeCheckout && localStorage.getItem('token')) {
+      if (cartItems.length > 0) setIsCartOpen(true);
+      navigate(location.pathname + location.search, { replace: true, state: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -100,6 +114,13 @@ const Menu: React.FC = () => {
           const transformedData = transformMenuData(data.menuItems);
           console.log('Transformed data:', transformedData);
           setMenuData(transformedData);
+
+          const { removed, priceChanged } = syncWithMenu(data.menuItems);
+          if (removed.length > 0) {
+            toast.warn(`No longer available and removed from your cart: ${removed.join(', ')}`);
+          } else if (priceChanged) {
+            toast.info('Some prices in your cart were updated.');
+          }
         } else {
           console.error('API error:', data.message);
           toast.error(data.message || 'Failed to fetch menu items');
@@ -184,9 +205,10 @@ const Menu: React.FC = () => {
     setIsCartOpen(false);
 
     const token = localStorage.getItem('token');
-    if(!token)
-      toastIdRef.current = toast.error(`Please Login to proceed to checkout`);
-    else
+    if (!token) {
+      toastIdRef.current = toast.info('Please log in to continue to checkout. Your cart will be saved.');
+      navigate('/login', { state: { from: location.pathname + location.search, resumeCheckout: true } });
+    } else
       setIsCheckoutOpen(true);
   };
 
