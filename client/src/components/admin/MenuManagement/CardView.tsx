@@ -2,6 +2,7 @@ import React from 'react';
 import { Eye, Edit, Power, PowerOff, Image, Flame, Salad, Sparkles } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { formatPrice } from '../../../utils/formatPrice';
 
 interface CardViewProps {
   items: MenuItem[];
@@ -109,7 +110,7 @@ const CardView: React.FC<CardViewProps> = ({
               </div>
               <div className="ml-4 text-right">
                 <span className="text-2xl font-body font-bold text-warm-brown-700">
-                  {item.price}
+                  {formatPrice(item.price)}
                 </span>
               </div>
             </div>

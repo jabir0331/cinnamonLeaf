@@ -3,7 +3,7 @@ export interface ApiMenuItem {
   _id: string;
   name: string;
   description: string;
-  price: string;
+  price: number;
   image: string;
   category: string;
   spicy?: boolean;
@@ -19,7 +19,7 @@ export interface MenuItem {
   name: string;
   description: string;
   category: string;
-  price: string;
+  price: number;
   image: string;
   spicy?: boolean;
   vegetarian?: boolean;
