@@ -59,14 +59,15 @@ exports.createMenuItem = [
       } = req.body;
 
       // Validate required fields
-      if (!name || !description || !category || !price || !req.file) {
+      const numericPrice = Number(price);
+      if (!name || !description || !category || !price || !Number.isFinite(numericPrice) || numericPrice < 0 || !req.file) {
         // If validation fails, delete the uploaded file
         if (req.file) {
           fs.unlinkSync(req.file.path);
         }
         return res.status(400).json({
           success: false,
-          message: "All required fields must be provided"
+          message: "All required fields must be provided, with a valid non-negative price"
         });
       }
 
@@ -77,7 +78,7 @@ exports.createMenuItem = [
         name,
         description,
         category,
-        price: `LKR ${parseFloat(price).toFixed(2)}`,
+        price: Math.round(numericPrice * 100) / 100,
         image: imagePath,
         spicy: spicy === 'true',
         vegetarian: vegetarian === 'true',
@@ -156,6 +157,15 @@ exports.updateMenuItem = [
         });
       }
 
+      const numericPrice = Number(price);
+      if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+        if (req.file) fs.unlinkSync(req.file.path);
+        return res.status(400).json({
+          success: false,
+          message: "A valid non-negative price is required"
+        });
+      }
+
       let imagePath = existingItem.image;
 
       // If new image is uploaded
@@ -174,7 +184,7 @@ exports.updateMenuItem = [
         name,
         description,
         category,
-        price: price.startsWith('LKR') ? price : `LKR ${parseFloat(price).toFixed(2)}`,
+        price: Math.round(numericPrice * 100) / 100,
         image: imagePath,
         spicy: spicy === 'true',
         vegetarian: vegetarian === 'true',

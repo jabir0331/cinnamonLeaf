@@ -19,8 +19,9 @@ const menuItemSchema = new mongoose.Schema(
             trim: true
         },
         price: {
-            type: String, // keeping as String, to store "LKR 550"
-            required: true
+            type: Number,
+            required: true,
+            min: 0
         },
         image: {
             type: String,
