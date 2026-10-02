@@ -157,15 +157,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-4 border-t space-y-3">
-
-                <Link
-                  to="/reservation"
-                  className="block w-full bg-sage-green-600 text-white text-center px-6 py-3 rounded-full font-medium"
-                >
-                  Reserve a Table
-                </Link>
-              </div>
             </div>
           </div>
         )}
