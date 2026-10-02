@@ -1,10 +1,11 @@
 // client/src/pages/SignupPage.tsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { toast } from 'react-toastify';
 import { signupUser, googleAuth } from '../services/auth';
+import { getPostLoginPath, AuthRedirectState } from '../utils/authRedirect';
 import logo from "../assets/images/cinnamonLeafLogo.png"
 import loginBackground from "../assets/images/loginBg.png";
 
@@ -27,6 +28,14 @@ interface FormErrors {
 const SignupPage: React.FC = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectState = location.state as AuthRedirectState | null;
+
+  // Return to the page the user came from (e.g. /menu); fall back to home on a direct visit
+  const goBack = () => (location.key !== 'default' ? navigate(-1) : navigate('/'));
+
+  const goAfterLogin = (role?: string) =>
+    navigate(getPostLoginPath(redirectState, role), { state: { resumeCheckout: redirectState?.resumeCheckout } });
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -121,7 +130,7 @@ const SignupPage: React.FC = () => {
       });
 
       // Redirect to dashboard after successful signup
-      navigate("/");
+      goAfterLogin(data.user?.role);
 
     } catch (err: any) {
       console.error('Signup error:', err);
@@ -153,7 +162,7 @@ const SignupPage: React.FC = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.user?.role || 'user');
 
-      navigate(data.user?.role === 'admin' ? "/admin/dashboard" : "/");
+      goAfterLogin(data.user?.role);
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Google sign-in failed');
       console.error(err);
@@ -171,12 +180,14 @@ const SignupPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="relative flex items-center justify-center mb-4">
-            <Link
-              to="/"
+            <button
+              type="button"
+              onClick={goBack}
+              aria-label="Go back"
               className="absolute left-0 inline-flex items-center justify-center w-10 h-10 bg-cream-100 hover:bg-cream-200 rounded-full transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-warm-brown-700" />
-            </Link>
+            </button>
             <div className="inline-flex items-center justify-center w-20 h-20 bg-warm-brown-100 rounded-full">
               {/* <UserPlus className="w-8 h-8 text-warm-brown-600" /> */}
               <img src={logo} alt="Cinnamon Leaf Logo" className='rounded-full' />
@@ -373,7 +384,7 @@ const SignupPage: React.FC = () => {
           <div className="text-center">
             <p className="text-sage-green-600 font-body">
               Already have an account?{' '}
-              <Link to="/login">
+              <Link to="/login" state={redirectState} replace>
                 <button
                   type="button"
                   className="text-warm-brown-600 hover:text-warm-brown-700 font-semibold transition-colors hover:underline"
