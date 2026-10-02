@@ -15,12 +15,13 @@ import { getAllMenuItems } from '../services/menuItems';
 import { saveOrder } from "../services/order";
 import { createCheckoutSession } from '../services/api';
 import { getImageUrl } from '../utils/imageUrl';
+import { formatPrice } from '../utils/formatPrice';
 
 interface ApiMenuItem {
   _id: string;
   name: string;
   description: string;
-  price: string;
+  price: number;
   image: string;
   category: string;
   spicy?: boolean;
@@ -29,9 +30,10 @@ interface ApiMenuItem {
 }
 
 interface MenuItem {
+  _id: string;
   name: string;
   description: string;
-  price: string;
+  price: number;
   image: any; // Imported image module
   spicy?: boolean;
   vegetarian?: boolean;
@@ -131,6 +133,7 @@ const Menu: React.FC = () => {
       if (categories[categoryKey]) {
 
         categories[categoryKey].items.push({
+          _id: item._id,
           name: item.name,
           description: item.description,
           price: item.price,
@@ -154,9 +157,9 @@ const Menu: React.FC = () => {
 
   const handleAddToCart = (item: MenuItem, category: string) => {
     const cartItem = {
-      id: `${category}-${item.name.toLowerCase().replace(/\s+/g, '-')}`,
+      id: item._id,
       name: item.name,
-      price: parseInt(item.price.replace('LKR ', '').replace(',', '')),
+      price: item.price,
       image: item.image,
       category
     };
@@ -446,7 +449,7 @@ const Menu: React.FC = () => {
                           {/* Price */}
                           <div className="mb-3">
                             <span className="font-body text-lg font-semibold text-sage-green-600">
-                              {item.price}
+                              {formatPrice(item.price)}
                             </span>
                           </div>
                         </div>
