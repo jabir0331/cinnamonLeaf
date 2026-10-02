@@ -9,7 +9,6 @@ import Menu from './pages/Menu';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
 import Promotions from './pages/Promotions';
-import Reservation from './pages/Reservation';
 import OrderSuccess from './pages/OrderSuccess';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
@@ -57,7 +56,6 @@ function App() {
           <Route path="/gallery" element={<Layout><Gallery /></Layout>} />
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/promotions" element={<Layout><Promotions /></Layout>} />
-          <Route path="/reservation" element={<Layout><Reservation /></Layout>} />
           <Route path="/orderHistory" element={<Layout><OrderHistory /></Layout>} />
 
           {/* Routes that don't use the Layout component */}

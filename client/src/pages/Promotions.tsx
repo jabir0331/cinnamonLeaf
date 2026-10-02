@@ -33,7 +33,7 @@ const Promotions: React.FC = () => {
 
   return (
     <div>
-      <section className="py-20 bg-cream-50 min-h-[85vh]">
+      <section className="py-10 bg-cream-50 min-h-[85vh]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
             Today's Promotions

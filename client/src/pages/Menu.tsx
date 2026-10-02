@@ -346,8 +346,8 @@ const Menu: React.FC = () => {
       />
 
       {/* Menu Navigation */}
-      <section className="sticky top-15 md:top-20 z-40 bg-cream-50 border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      <section className="sticky top-15 md:top-20 z-40 bg-cream-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
             Our Menu
           </h2>

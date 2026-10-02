@@ -8,7 +8,6 @@ const PAGE_TITLES: Record<string, string> = {
     '/gallery': 'Gallery',
     '/contact': 'Contact Us',
     '/promotions': 'Promotions',
-    '/reservation': 'Reservation',
     '/orderHistory': 'Order History',
     '/order-success': 'Order Confirmed',
     '/signup': 'Sign Up',

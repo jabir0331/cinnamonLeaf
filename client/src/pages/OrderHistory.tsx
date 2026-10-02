@@ -180,8 +180,8 @@ const OrderHistory: React.FC = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-cream-50 via-warm-brown-25 to-sage-green-25">
             {/* Fixed Header Section with Integrated Filters */}
-            <div className="sticky top-15 md:top-20 z-40 bg-cream-50 border-b shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+            <div className="sticky top-15 md:top-20 z-40 bg-cream-50 border-b border-gray-100">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
                     {/* Header Content */}
                     <h2 className="font-display text-3xl md:text-4xl font-bold text-warm-brown-700 mb-4">
                         Order History
