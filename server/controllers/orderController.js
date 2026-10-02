@@ -1,19 +1,27 @@
 // server/controllers/orderController.js
 const Order = require("../models/Order");
+const { resolveOrderItems } = require("../utils/orderPricing");
 
 exports.createOrder = async (req, res) => {
-  console.log("Body received:", req.body);
-  console.log("User:", req.user);
   try {
+    const { items, deliveryInfo, orderNumber, paymentMethod, paymentStatus } = req.body;
+
+    // Re-price every item against MongoDB - never trust the price/total the client sent
+    const { items: resolvedItems, totalAmount } = await resolveOrderItems(items);
+
     const order = new Order({
-      ...req.body,
-      userId: req.user.id   
+      orderNumber,
+      items: resolvedItems,
+      deliveryInfo,
+      totalAmount,
+      paymentMethod,
+      paymentStatus,
+      userId: req.user.id
     });
-    console.log(req);
+
     await order.save();
     res.status(201).json({ success: true, order });
   } catch (err) {
-    console.log(req);
     console.error("Error saving order:", err);
     res.status(400).json({ success: false, message: err.message });
   }

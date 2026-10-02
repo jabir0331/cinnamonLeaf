@@ -3,6 +3,7 @@ const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Order = require('../models/Order');
 const { v4: uuidv4 } = require('uuid');
+const { resolveOrderItems } = require('../utils/orderPricing');
 
 const router = express.Router();
 
@@ -11,12 +12,7 @@ router.post('/create-session', async (req, res) => {
   try {
     console.log('Received checkout request:', req.body);
 
-    const { items, deliveryInfo, totalAmount, orderNumber } = req.body;
-
-    // Validate required fields
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: 'Items are required' });
-    }
+    const { items, deliveryInfo, orderNumber } = req.body;
 
     if (!deliveryInfo || !deliveryInfo.name || !deliveryInfo.phone) {
       return res.status(400).json({ error: 'Delivery information is required' });
@@ -26,25 +22,27 @@ router.post('/create-session', async (req, res) => {
       return res.status(400).json({ error: 'Order number is required' });
     }
 
-    console.log('Processing items:', items);
+    // Re-price every item against MongoDB - never trust the price the client sent
+    let resolvedItems, totalAmount;
+    try {
+      ({ items: resolvedItems, totalAmount } = await resolveOrderItems(items));
+    } catch (validationError) {
+      return res.status(400).json({ error: validationError.message });
+    }
 
     // Convert items to Stripe line items
-    const lineItems = items.map(item => {
-      console.log(`Processing item: ${item.name}, price: ${item.price}, quantity: ${item.quantity}`);
-
-      return {
-        price_data: {
-          currency: 'lkr', // Sri Lankan Rupees
-          product_data: {
-            name: item.name,
-            // Note: Stripe requires public URLs for images
-            // images: item.image ? [item.image] : [],
-          },
-          unit_amount: Math.round(item.price * 100), // Convert to cents/paisa
+    const lineItems = resolvedItems.map(item => ({
+      price_data: {
+        currency: 'lkr', // Sri Lankan Rupees
+        product_data: {
+          name: item.name,
+          // Note: Stripe requires public URLs for images
+          // images: item.image ? [item.image] : [],
         },
-        quantity: item.quantity || 1,
-      };
-    });
+        unit_amount: Math.round(item.price * 100), // Convert to cents/paisa
+      },
+      quantity: item.quantity,
+    }));
 
     console.log('Line items created:', lineItems);
 
@@ -65,13 +63,10 @@ router.post('/create-session', async (req, res) => {
         customerPhone: deliveryInfo.phone,
         deliveryAddress: deliveryInfo.address || '',
         totalAmount: totalAmount.toString(),
-        orderItems: JSON.stringify(items.map(item => ({
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity || 1,
-          price: item.price,
-          category: item.category
-        })))
+        // Keep this compact - Stripe metadata values are capped at 500 chars
+        orderItems: JSON.stringify(resolvedItems.map(({ id, name, price, quantity, category }) => (
+          { id, name, price, quantity, category }
+        )))
       },
       // Enable shipping address collection for Sri Lanka
       shipping_address_collection: {
