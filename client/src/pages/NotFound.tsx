@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Home } from 'lucide-react';
 import logo from '../assets/images/cinnamonLeafLogo.png';
+import loginBackground from '../assets/images/loginBg.png';
 
 const NotFound: React.FC = () => {
     const navigate = useNavigate();
@@ -9,7 +10,10 @@ const NotFound: React.FC = () => {
     const goHome = () => navigate(role === 'admin' ? '/admin/dashboard' : '/');
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-cream-50 to-sage-green-50 flex items-center justify-center p-4">
+        <div
+            className="min-h-screen flex items-center justify-center p-4 bg-cover bg-left-top bg-no-repeat"
+            style={{ backgroundImage: `url(${loginBackground})` }}
+        >
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 md:p-12 border border-sage-green-100 text-center">
                 {/* Brand Logo */}
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-warm-brown-100 rounded-full mb-6">
