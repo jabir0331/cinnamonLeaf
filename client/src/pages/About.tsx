@@ -14,7 +14,7 @@ const About: React.FC = () => {
     <div>
 
       {/* Main Story Section */}
-      <section className="mt-5 py-20 bg-cream-50">
+      <section className="mt-5 py-10 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
