@@ -2,6 +2,7 @@ import React from 'react';
 import { Edit, Power, PowerOff, Image, Flame, Salad, Sparkles } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { formatPrice } from '../../../utils/formatPrice';
 
 interface TableViewProps {
   items: MenuItem[];
@@ -97,7 +98,7 @@ const TableView: React.FC<TableViewProps> = ({
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-warm-brown-600">
-                    {item.price}
+                    {formatPrice(item.price)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${item.status === 'Available'

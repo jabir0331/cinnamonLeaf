@@ -2,6 +2,7 @@ import React from 'react';
 import { Edit, Power, PowerOff, Image, X, Clock, Utensils, Flame, Salad, Sparkles } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { formatPrice } from '../../../utils/formatPrice';
 
 interface DetailModalProps {
   isOpen: boolean;
@@ -135,7 +136,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
 
                   <div className="text-right">
                     <h4 className="text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-2 font-body">Price</h4>
-                    <p className="text-3xl font-body font-bold text-warm-brown-700">{item.price}</p>
+                    <p className="text-3xl font-body font-bold text-warm-brown-700">{formatPrice(item.price)}</p>
                   </div>
                 </div>
 

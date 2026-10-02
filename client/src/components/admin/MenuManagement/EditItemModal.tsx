@@ -53,7 +53,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                 name: item.name || '',
                 category: item.category || '',
                 description: item.description || '',
-                price: item.price || '',
+                price: item.price != null ? String(item.price) : '',
                 image: item.image || '',
                 vegetarian: item.vegetarian || false,
                 spicy: item.spicy || false,
@@ -109,7 +109,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                 name: item.name || '',
                 category: item.category || '',
                 description: item.description || '',
-                price: item.price || '',
+                price: item.price != null ? String(item.price) : '',
                 image: item.image || '',
                 vegetarian: item.vegetarian || false,
                 spicy: item.spicy || false,
@@ -148,6 +148,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                 const updatedItem: MenuItem = {
                     ...item,
                     ...formData,
+                    price: Number(formData.price),
                     // Use the image URL from response if available
                     image: response.menuItem?.image || formData.image
                 };
@@ -236,9 +237,11 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
                                     <div className="relative">
                                         <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">LKR</span>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={formData.price}
                                             onChange={(e) => handleInputChange('price', e.target.value)}
+                                            step="0.01"
+                                            min="0"
                                             className="w-full pl-16 pr-4 py-3 border border-warm-brown-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-green-500 focus:border-transparent transition-all font-body"
                                             placeholder="0.00"
                                         />
