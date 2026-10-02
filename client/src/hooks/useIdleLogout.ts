@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { logoutUser } from '../services/auth';
+import { clearStoredCart } from '../utils/cartStorage';
 
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 const CHECK_INTERVAL_MS = 30 * 1000;
@@ -63,6 +64,7 @@ export const useIdleLogout = () => {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           localStorage.removeItem('role');
+          clearStoredCart();
           localStorage.removeItem(ACTIVITY_STORAGE_KEY);
           toast.info("You've been logged out due to inactivity.");
           navigate('/login');

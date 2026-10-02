@@ -4,6 +4,7 @@ import { ChevronDown, LogOut, User } from 'lucide-react';
 import { toast } from 'react-toastify';
 import DisplayTime from './DisplayTime';
 import { logoutUser } from '../../../services/auth';
+import { clearStoredCart } from '../../../utils/cartStorage';
 
 interface HeaderProps {
   headerText: string;
@@ -34,6 +35,7 @@ const Header: React.FC<HeaderProps> = ({ headerText, sidebarOpen }) => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('role');
+      clearStoredCart();
       toast.success('Logged out successfully!');
       navigate('/login');
     } catch (error) {

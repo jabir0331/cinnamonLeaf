@@ -6,6 +6,7 @@ import Footer from './Footer';
 import { useScrollToTop } from '../hooks/useScrollToTop';
 import { toast } from 'react-toastify';
 import { logoutUser } from '../services/auth';
+import { clearStoredCart } from '../utils/cartStorage';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -66,6 +67,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       localStorage.removeItem('token'); // clear locally
       localStorage.removeItem('user');
       localStorage.removeItem('role');
+      clearStoredCart();
       toast.success("Logged out successfully!");
       navigate("/");
     }
