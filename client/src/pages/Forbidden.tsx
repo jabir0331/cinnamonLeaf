@@ -43,20 +43,19 @@ const Forbidden: React.FC = () => {
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
-                        onClick={goHome}
-                        className="flex items-center justify-center gap-2 bg-sage-green-600 hover:bg-sage-green-700 text-white font-body font-medium py-3 px-6 rounded-lg transition-colors duration-200"
-                    >
-                        <Home size={16} />
-                        Go to Homepage
-                    </button>
-
-                    <button
                         onClick={() => navigate(-1)}
                         className="flex items-center justify-center gap-2 bg-warm-brown-100 hover:bg-warm-brown-200 text-warm-brown-700 font-body font-medium py-3 px-6 rounded-lg transition-colors duration-200"
                     >
                         <ArrowLeft size={16} />
                         Back
                     </button>
+                    <button
+                        onClick={goHome}
+                        className="flex items-center justify-center gap-2 bg-sage-green-600 hover:bg-sage-green-700 text-white font-body font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+                    >
+                        <Home size={16} />
+                        Go to Homepage
+                    </button>                    
                 </div>
             </div>
         </div>
