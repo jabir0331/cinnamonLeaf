@@ -95,6 +95,12 @@ exports.googleAuth = async (req, res) => {
   }
 };
 
+// Profile details used to pre-fill the checkout form
+exports.getMe = (req, res) => {
+  const { _id, name, email, phone, role } = req.user;
+  res.json({ user: { id: _id, name, email, phone: phone || '', role } });
+};
+
 exports.logout = (req, res) => {
   // Optionally: invalidate token in DB/Redis if implementing blacklisting
   return res.json({ message: 'Logged out successfully' });
