@@ -5,6 +5,8 @@ interface ConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderNumber: string;
+  // New customers get a confirmation call; returning customers' orders go straight to the kitchen
+  isNewCustomer: boolean;
   estimatedDelivery: string;
 }
 
@@ -12,6 +14,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   isOpen,
   onClose,
   orderNumber,
+  isNewCustomer,
   estimatedDelivery
 }) => {
   if (!isOpen) return null;
@@ -21,20 +24,30 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
         
-        <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full">
+        <div className="relative bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden">
+          {/* Header */}
+          <div className="relative bg-gradient-to-r from-warm-brown-50 via-cream-50 to-sage-green-50 px-8 py-6 border-b border-warm-brown-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-display font-bold text-warm-brown-800 mb-1">Order Confirmed!</h2>
+                <p className="text-sage-green-600 font-body">Thank you for your order. We'll prepare it with care!</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="group p-3 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded-2xl transition-all duration-200 hover:scale-110"
+              >
+                <X size={24} className="group-hover:rotate-90 transition-transform duration-200" />
+              </button>
+            </div>
+          </div>
+
           <div className="p-8 text-center">
             {/* Success Icon */}
             <div className="mx-auto mb-6 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle size={32} className="text-green-600" />
             </div>
-
-            {/* Header */}
-            <h2 className="font-display text-2xl font-bold text-warm-brown-700 mb-2">
-              Order Confirmed!
-            </h2>
-            <p className="font-body text-warm-brown-600 mb-6">
-              Thank you for your order. We'll prepare it with care!
-            </p>
 
             {/* Order Details */}
             <div className="bg-cream-50 rounded-lg p-4 mb-6 text-left">
@@ -67,7 +80,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
             {/* Additional Info */}
             <p className="font-body text-sm text-warm-brown-500 mb-6">
-              We'll call you shortly to confirm your order details and delivery time.
+              {isNewCustomer
+                ? "We'll call you shortly to confirm your order details and delivery time."
+                : "Your order has gone straight to our kitchen. We'll start preparing it right away."}
             </p>
 
             {/* Close Button */}
@@ -78,14 +93,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               Continue Shopping
             </button>
           </div>
-
-          {/* Close X Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-cream-100 rounded-full transition-colors"
-          >
-            <X size={20} className="text-warm-brown-600" />
-          </button>
         </div>
       </div>
     </div>
