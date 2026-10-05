@@ -15,6 +15,21 @@ const deliveryInfoSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   email: { type: String },
   address: { type: String, required: true },
+  // Pin dropped on the map at checkout (optional - the typed address is still required)
+  location: {
+    lat: { type: Number, min: -90, max: 90 },
+    lng: { type: Number, min: -180, max: 180 }
+  },
+  // Named places near the pin (looked up client-side) to help riders find the address
+  landmarks: {
+    type: [{
+      _id: false,
+      name: { type: String, trim: true, maxlength: 120 },
+      kind: { type: String, trim: true, maxlength: 60 },
+      distance: { type: Number, min: 0, max: 5000 }
+    }],
+    validate: [(list) => list.length <= 5, 'Too many landmarks']
+  },
   specialNotes: { type: String }
 });
 
@@ -36,6 +51,8 @@ const orderSchema = new mongoose.Schema({
     default: 'pending' 
   },
   stripeSessionId: { type: String },
+  // True when the customer had no delivered orders yet - new customers get a confirmation call
+  isNewCustomer: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

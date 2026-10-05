@@ -4,6 +4,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Order = require('../models/Order');
 const { v4: uuidv4 } = require('uuid');
 const { resolveOrderItems } = require('../utils/orderPricing');
+const { assertWithinDeliveryZone } = require('../utils/deliveryZone');
+const { CHECKOUT_SESSION_MINUTES } = require('../config/orderRules');
 
 const router = express.Router();
 
@@ -20,6 +22,13 @@ router.post('/create-session', async (req, res) => {
 
     if (!orderNumber) {
       return res.status(400).json({ error: 'Order number is required' });
+    }
+
+    // Only deliver within the restaurant's delivery radius
+    try {
+      assertWithinDeliveryZone(deliveryInfo);
+    } catch (zoneError) {
+      return res.status(400).json({ error: zoneError.message });
     }
 
     // Re-price every item against MongoDB - never trust the price the client sent
@@ -49,24 +58,31 @@ router.post('/create-session', async (req, res) => {
     // Use the order number passed from frontend (no need to generate a new one)
     console.log('Using order number from frontend:', orderNumber);
 
+    const orderItemsMetadata = JSON.stringify(resolvedItems.map(({ id, name, price, quantity, category }) => (
+      { id, name, price, quantity, category }
+    )));
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       success_url: `${process.env.FRONTEND_URL}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/menu?canceled=true`,
+      // The order number lets the menu page cancel the unpaid order the customer just backed out of
+      cancel_url: `${process.env.FRONTEND_URL}/menu?canceled=true&order=${encodeURIComponent(orderNumber)}`,
+      // The unpaid order is cancelled after a while, so the payment link must stop working first
+      expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_MINUTES * 60,
       customer_email: deliveryInfo.email || undefined,
       metadata: {
         orderNumber: orderNumber,
         customerName: deliveryInfo.name,
         customerPhone: deliveryInfo.phone,
-        deliveryAddress: deliveryInfo.address || '',
+        // Stripe rejects metadata values longer than 500 characters
+        deliveryAddress: (deliveryInfo.address || '').slice(0, 500),
         totalAmount: totalAmount.toString(),
-        // Keep this compact - Stripe metadata values are capped at 500 chars
-        orderItems: JSON.stringify(resolvedItems.map(({ id, name, price, quantity, category }) => (
-          { id, name, price, quantity, category }
-        )))
+        // Only a fallback copy of the items (the order is already saved in MongoDB), so leave it
+        // out when a large cart would push it over the limit and fail the whole checkout
+        ...(orderItemsMetadata.length <= 500 && { orderItems: orderItemsMetadata })
       },
       // Enable shipping address collection for Sri Lanka
       shipping_address_collection: {
@@ -158,6 +174,7 @@ router.get('/verify-session/:sessionId', async (req, res) => {
                 deliveryInfo: updatedOrder.deliveryInfo,
                 totalAmount: updatedOrder.totalAmount,
                 orderStatus: updatedOrder.orderStatus,
+                isNewCustomer: updatedOrder.isNewCustomer,
                 createdAt: updatedOrder.createdAt
               }
             });
