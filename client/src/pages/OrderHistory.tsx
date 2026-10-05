@@ -21,7 +21,7 @@ interface DeliveryInfo {
 }
 
 interface Order {
-    id: string;
+    _id: string;
     orderNumber: string;
     createdtedAt: string;
     updatedAt: string;
@@ -263,7 +263,7 @@ const OrderHistory: React.FC = () => {
                         {filteredOrders.map((order, index) => {
                             const statusConfig = getStatusConfig(order.orderStatus);
                             return (
-                                <div key={order.id} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-cream-200 overflow-hidden hover:shadow-2xl transform hover:scale-102 transition-all duration-300" style={{ animationDelay: `${index * 100}ms` }}>
+                                <div key={order._id} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-cream-200 overflow-hidden hover:shadow-2xl transform hover:scale-102 transition-all duration-300" style={{ animationDelay: `${index * 100}ms` }}>
                                     {/* Enhanced Order Header */}
                                     <div className="relative p-8 border-b border-cream-100 bg-gradient-to-r from-cream-50/50 to-sage-green-50/50">
 
