@@ -8,6 +8,7 @@ import { loginUser, googleAuth } from '../services/auth';
 import { getPostLoginPath, AuthRedirectState } from '../utils/authRedirect';
 import logo from "../assets/images/cinnamonLeafLogo.png"
 import loginBackground from "../assets/images/loginBg.png";
+import { apiServerMessage } from '../utils/errors';
 
 interface FormData {
     email: string;
@@ -98,8 +99,8 @@ const LoginPage: React.FC = () => {
 
 
             goAfterLogin(data.user?.role);
-        } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Invalid credentials');
+        } catch (err) {
+            toast.error(apiServerMessage(err) || 'Invalid credentials');
             console.error(err);
         } finally {
             setIsSubmitting(false);
@@ -121,8 +122,8 @@ const LoginPage: React.FC = () => {
             localStorage.setItem('role', data.user?.role || 'user');
 
             goAfterLogin(data.user?.role);
-        } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Google sign-in failed');
+        } catch (err) {
+            toast.error(apiServerMessage(err) || 'Google sign-in failed');
             console.error(err);
         }
     };

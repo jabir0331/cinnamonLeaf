@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Phone, Facebook, Instagram } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import logo from '../assets/images/cinnamonLeafLogo.png'
 import Footer from './Footer';
 import { useScrollToTop } from '../hooks/useScrollToTop';

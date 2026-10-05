@@ -2,13 +2,18 @@ import { CartItem } from '../types/cart';
 
 const CART_STORAGE_KEY = 'cart';
 
-const isCartItem = (value: any): value is CartItem =>
-  value &&
-  typeof value.id === 'string' &&
-  typeof value.name === 'string' &&
-  typeof value.price === 'number' &&
-  Number.isInteger(value.quantity) &&
-  value.quantity > 0;
+const isCartItem = (value: unknown): value is CartItem => {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.id === 'string' &&
+    typeof item.name === 'string' &&
+    typeof item.price === 'number' &&
+    typeof item.quantity === 'number' &&
+    Number.isInteger(item.quantity) &&
+    item.quantity > 0
+  );
+};
 
 export const loadCart = (): CartItem[] => {
   try {

@@ -8,6 +8,7 @@ import { signupUser, googleAuth } from '../services/auth';
 import { getPostLoginPath, AuthRedirectState } from '../utils/authRedirect';
 import logo from "../assets/images/cinnamonLeafLogo.png"
 import loginBackground from "../assets/images/loginBg.png";
+import { apiErrorMessage, apiServerMessage } from '../utils/errors';
 
 interface FormData {
   name: string;
@@ -67,10 +68,10 @@ const SignupPage: React.FC = () => {
     }
 
     // Phone validation
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const phoneRegex = /^\+?[1-9]\d{0,15}$/;
     if (!formData.phone) {
       newErrors.phone = 'Phone number is required';
-    } else if (!phoneRegex.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
+    } else if (!phoneRegex.test(formData.phone.replace(/[\s()-]/g, ''))) {
       newErrors.phone = 'Invalid phone number';
     }
 
@@ -132,17 +133,9 @@ const SignupPage: React.FC = () => {
       // Redirect to dashboard after successful signup
       goAfterLogin(data.user?.role);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Signup error:', err);
-
-      // More specific error handling
-      if (err.response?.data?.error) {
-        toast.error(err.response.data.error);
-      } else if (err.message) {
-        toast.error(err.message);
-      } else {
-        toast.error('Failed to create account. Please try again.');
-      }
+      toast.error(apiErrorMessage(err, 'Failed to create account. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -163,8 +156,8 @@ const SignupPage: React.FC = () => {
       localStorage.setItem('role', data.user?.role || 'user');
 
       goAfterLogin(data.user?.role);
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Google sign-in failed');
+    } catch (err) {
+      toast.error(apiServerMessage(err) || 'Google sign-in failed');
       console.error(err);
     }
   };

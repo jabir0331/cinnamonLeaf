@@ -4,6 +4,7 @@ import { createMenuItem } from '../../../services/menuItems';
 import { getAllCategories } from '../../../services/categories';
 import { Category } from '../../../types/menu';
 import { toast } from 'react-toastify';
+import { apiServerMessage } from '../../../utils/errors';
 
 interface AddItemModalProps {
     isOpen: boolean;
@@ -135,9 +136,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             } else {
                 toast.error(response.message || 'Failed to create menu item');
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error creating menu item:', error);
-            toast.error(error.response?.data?.message || 'Failed to create menu item');
+            toast.error(apiServerMessage(error) || 'Failed to create menu item');
         } finally {
             setIsSubmitting(false);
         }

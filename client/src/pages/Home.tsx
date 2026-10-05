@@ -26,7 +26,7 @@ const Home: React.FC = () => {
     getAllCategories()
       .then((data) => {
         if (data.success) {
-          const active = data.categories.filter((c: Category) => c.isActive);
+          const active: Category[] = data.categories.filter((c: Category) => c.isActive);
           setCategories(shuffle(active).slice(0, 3));
         }
       })

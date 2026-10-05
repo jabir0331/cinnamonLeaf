@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Plus, Minus, Trash2, ShoppingBag, DollarSign } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { CartItem } from '../types/cart';
 import { getImageUrl } from '../utils/imageUrl';
 
@@ -73,7 +73,7 @@ const Cart: React.FC<CartProps> = ({
               </div>
             ) : (
               <div className="space-y-3">
-                {items.map((item, index) => (
+                {items.map(item => (
                   <div key={item.id} className="bg-white border border-cream-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
                     <div className="flex gap-4">
                       <div className="relative">

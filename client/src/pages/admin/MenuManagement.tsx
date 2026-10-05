@@ -27,7 +27,7 @@ const MenuManagement: React.FC = () => {
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
-  const [menuData, setMenuData] = useState<Record<string, MenuCategory>>({});
+  const [, setMenuData] = useState<Record<string, MenuCategory>>({});
   const [allMenuItems, setAllMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

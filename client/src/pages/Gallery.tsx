@@ -21,14 +21,14 @@ import roofTopArea from '../assets/images/gallery/interior/roofTopArea.jpg';
 
 interface GalleryImage {
   id: number;
-  src: any; // Imported image module or URL string
+  src: string; // Imported image URL
   alt: string;
   category: 'food' | 'interior' | 'ambiance';
 }
 
 const Gallery: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'food' | 'interior' | 'ambiance'>('all');
+  const [activeFilter] = useState<'all' | 'food' | 'interior' | 'ambiance'>('all');
 
   const images: GalleryImage[] = [
     // Food Images
@@ -55,13 +55,6 @@ const Gallery: React.FC = () => {
   const filteredImages = activeFilter === 'all'
     ? images
     : images.filter(image => image.category === activeFilter);
-
-  const filterButtons = [
-    { id: 'all', label: 'All Photos' },
-    { id: 'food', label: 'Our Dishes' },
-    { id: 'interior', label: 'Interior' },
-    { id: 'ambiance', label: 'Atmosphere' },
-  ];
 
   return (
     <div>
