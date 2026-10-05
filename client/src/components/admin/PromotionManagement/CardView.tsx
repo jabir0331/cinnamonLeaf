@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, Power, PowerOff, Image, Megaphone } from 'lucide-react';
+import { Edit, Power, PowerOff, Megaphone } from 'lucide-react';
 import { Promotion } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
 

@@ -2,6 +2,9 @@
 const mongoose = require('mongoose');
 const MenuItems = require('../models/MenuItems');
 
+// Upper bound per line item, to catch typos and abuse
+const MAX_ITEM_QUANTITY = 100;
+
 // MenuItems.price is a validated Number at the schema level; this just
 // guards against a corrupt/missing value before it's trusted for a charge.
 const parsePrice = (price) => {
@@ -42,7 +45,11 @@ async function resolveOrderItems(items) {
             throw new Error(`Invalid price configured for ${menuItem.name}`);
         }
 
-        const quantity = Number.isInteger(item.quantity) && item.quantity > 0 ? item.quantity : 1;
+        // Never guess what the customer meant: a missing, fractional, zero or negative quantity is an error
+        const quantity = item.quantity;
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_ITEM_QUANTITY) {
+            throw new Error(`Invalid quantity for ${menuItem.name}. Please choose between 1 and ${MAX_ITEM_QUANTITY}.`);
+        }
 
         resolvedItems.push({
             id: menuItem._id.toString(),

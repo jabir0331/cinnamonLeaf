@@ -1,5 +1,6 @@
 // client/src/services/menuItems.ts
 import axios from "axios";
+import { apiErrorData, apiErrorStatus } from "../utils/errors";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -9,10 +10,10 @@ export const getAllMenuItems = async () => {
     const response = await axios.get(`${API_URL}/menu/viewAll`);
     console.log('API Response:', response.data);
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error fetching menu items:", err);
-    console.error("Error response:", err.response?.data);
-    console.error("Error status:", err.response?.status);
+    console.error("Error response:", apiErrorData(err));
+    console.error("Error status:", apiErrorStatus(err));
     throw err;
   }
 };
@@ -30,9 +31,9 @@ export const createMenuItem = async (formData: FormData) => {
     });
     console.log('Create response:', response.data);
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error creating menu item:", err);
-    console.error("Error response:", err.response?.data);
+    console.error("Error response:", apiErrorData(err));
     throw err;
   }
 };
@@ -49,9 +50,9 @@ export const updateMenuItem = async (id: string, formData: FormData) => {
     });
     console.log('Update response:', response.data);
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error updating menu item:", err);
-    console.error("Error response:", err.response?.data);
+    console.error("Error response:", apiErrorData(err));
     throw err;
   }
 };
@@ -66,9 +67,9 @@ export const toggleMenuItemStatus = async (id: string) => {
     });
     console.log('Toggle status response:', response.data);
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error toggling menu item status:", err);
-    console.error("Error response:", err.response?.data);
+    console.error("Error response:", apiErrorData(err));
     throw err;
   }
 };

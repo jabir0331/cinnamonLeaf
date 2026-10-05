@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Salad, ChefHat, IceCream, Coffee, Plus, Flame, Sparkles } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { toast } from 'react-toastify';
+import { toast, type Id } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { useCart } from '../hooks/useCart';
@@ -10,12 +10,13 @@ import CartButton from '../components/CartButton';
 import Cart from '../components/Cart';
 import CheckoutModal from '../components/CheckoutModal';
 import ConfirmationModal from '../components/ConfirmationModal';
-import { DeliveryInfo } from '../types/cart';
+import { DeliveryInfo, OrderPayload } from '../types/cart';
 import { getAllMenuItems } from '../services/menuItems';
-import { saveOrder } from "../services/order";
+import { saveOrder, cancelUnpaidOrder } from "../services/order";
 import { createCheckoutSession } from '../services/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { formatPrice } from '../utils/formatPrice';
+import { apiErrorStatus, apiServerMessage } from '../utils/errors';
 
 interface ApiMenuItem {
   _id: string;
@@ -35,7 +36,7 @@ interface MenuItem {
   name: string;
   description: string;
   price: number;
-  image: any; // Imported image module
+  image: string; // Image URL
   spicy?: boolean;
   vegetarian?: boolean;
   signature?: boolean;
@@ -74,9 +75,10 @@ const Menu: React.FC = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [isNewCustomer, setIsNewCustomer] = useState(true);
 
   // Add refs to prevent duplicate toasts
-  const toastIdRef = useRef<any>(null);
+  const toastIdRef = useRef<Id | null>(null);
   const isProcessingOrder = useRef(false);
 
   const {
@@ -99,6 +101,25 @@ const Menu: React.FC = () => {
       if (cartItems.length > 0) setIsCartOpen(true);
       navigate(location.pathname + location.search, { replace: true, state: null });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Back from Stripe without paying: cancel the unpaid order that was saved for it.
+  // The cart was kept, so the customer can simply try again.
+  useEffect(() => {
+    if (searchParams.get('canceled') !== 'true') return;
+
+    const unpaidOrderNumber = searchParams.get('order');
+    if (unpaidOrderNumber) {
+      cancelUnpaidOrder(unpaidOrderNumber).catch(() => { /* already cancelled or expired */ });
+    }
+    toast.info('Payment cancelled. Your order was not placed.');
+
+    const remaining = new URLSearchParams(searchParams);
+    remaining.delete('canceled');
+    remaining.delete('order');
+    const query = remaining.toString();
+    navigate(location.pathname + (query ? `?${query}` : ''), { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -137,7 +158,7 @@ const Menu: React.FC = () => {
     };
 
     fetchMenuItems();
-  }, []);
+  }, [syncWithMenu]);
 
   // Helper function to transform API data to component format
   const transformMenuData = (apiItems: ApiMenuItem[]): Record<string, MenuCategory> => {
@@ -221,7 +242,7 @@ const Menu: React.FC = () => {
     const newOrderNumber = "ORD-" + uuidv4().substring(0, 8).toUpperCase();
 
     // Prepare order payload
-    const orderData = {
+    const orderData: OrderPayload = {
       orderNumber: newOrderNumber,
       items: cartItems.map(item => ({
         id: item.id,
@@ -237,12 +258,16 @@ const Menu: React.FC = () => {
       paymentStatus: 'pending'
     };
 
+    let savedIsNewCustomer = true;
     try {
       // Save to backend with the same order number
-      await saveOrder(orderData);
+      const saved = await saveOrder(orderData);
+      savedIsNewCustomer = saved?.order?.isNewCustomer !== false;
       console.log("Order saved successfully with order number:", newOrderNumber);
     } catch (err) {
-      toast.error("Please login to create & track orders");
+      // The server rejects orders it can't take (outside the delivery area, cash over the limit)
+      const reason = apiErrorStatus(err) === 400 ? apiServerMessage(err) : undefined;
+      toast.error(reason || "Please login to create & track orders");
       isProcessingOrder.current = false;
       return;
     }
@@ -266,10 +291,8 @@ const Menu: React.FC = () => {
         toast.dismiss(loadingToast);
 
         if (response.success && response.checkoutUrl) {
-          // Clear cart before redirecting
-          clearCart();
-
-          // Redirect to Stripe checkout
+          // The cart is only cleared once payment succeeds (on the order success page),
+          // so a customer who backs out of Stripe keeps it
           window.location.href = response.checkoutUrl;
         } else {
           throw new Error('Invalid response from server');
@@ -277,6 +300,8 @@ const Menu: React.FC = () => {
 
       } catch (error) {
         console.error('Stripe checkout error:', error);
+        // Payment never started, so don't leave the saved order sitting there unpaid
+        cancelUnpaidOrder(newOrderNumber).catch(() => { /* it will expire on its own */ });
         toast.error(error instanceof Error ? error.message : 'Payment setup failed. Please try again.');
         setIsCheckoutOpen(true); // Reopen checkout modal
       }
@@ -287,6 +312,7 @@ const Menu: React.FC = () => {
     else {
       // Handle COD order
       setOrderNumber(newOrderNumber);
+      setIsNewCustomer(savedIsNewCustomer);
       setIsCheckoutOpen(false);
       setIsConfirmationOpen(true);
       clearCart();
@@ -294,7 +320,9 @@ const Menu: React.FC = () => {
       // Dismiss all toasts and show success message
       toast.dismiss();
       setTimeout(() => {
-        toastIdRef.current = toast.success('Order confirmed! We\'ll call you shortly.');
+        toastIdRef.current = toast.success(
+          savedIsNewCustomer ? 'Order confirmed! We\'ll call you shortly.' : 'Order confirmed! We\'re getting it ready.'
+        );
       }, 100);
     }
 
@@ -364,6 +392,7 @@ const Menu: React.FC = () => {
         isOpen={isConfirmationOpen}
         onClose={() => setIsConfirmationOpen(false)}
         orderNumber={orderNumber}
+        isNewCustomer={isNewCustomer}
         estimatedDelivery="30-45 minutes"
       />
 

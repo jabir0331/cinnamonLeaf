@@ -7,7 +7,7 @@ export const getAllPromotions = async () => {
   try {
     const response = await axios.get(`${API_URL}/promotions/viewAll`);
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error fetching promotions:", err);
     throw err;
   }
@@ -23,7 +23,7 @@ export const createPromotion = async (formData: FormData) => {
       }
     });
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error creating promotion:", err);
     throw err;
   }
@@ -39,7 +39,7 @@ export const updatePromotion = async (id: string, formData: FormData) => {
       }
     });
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error updating promotion:", err);
     throw err;
   }
@@ -52,7 +52,7 @@ export const togglePromotionStatus = async (id: string) => {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error toggling promotion status:", err);
     throw err;
   }

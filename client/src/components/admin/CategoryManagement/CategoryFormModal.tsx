@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Category } from '../../../types/menu';
 import { createCategory, updateCategory } from '../../../services/categories';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { apiServerMessage } from '../../../utils/errors';
 
 interface CategoryFormModalProps {
     isOpen: boolean;
@@ -114,9 +115,9 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             } else {
                 toast.error(response.message || 'Failed to save category');
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error saving category:', error);
-            toast.error(error.response?.data?.message || 'Failed to save category');
+            toast.error(apiServerMessage(error) || 'Failed to save category');
         } finally {
             setIsSubmitting(false);
         }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Power, PowerOff, X, AlertTriangle } from 'lucide-react';
+import { Power, PowerOff, X } from 'lucide-react';
 
 interface ConfirmationModalProps {
   isOpen: boolean;

@@ -117,6 +117,8 @@ const Footer: React.FC<FooterProps> = ({ navLinks }) => {
               <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-cream-400 to-transparent rounded"></div>
             </h3>
             <div className="space-y-4">
+              {/* TODO: Show the restaurant address from the business settings (database) once the admin settings page exists.
+                  The delivery radius check uses the same location - see client/src/config/restaurant.ts */}
               <div className="group flex items-start space-x-3 text-cream-200 hover:text-cream-100 transition-colors duration-300 ">
                 <MapPin size={16} className="mt-0.5 text-cream-300 group-hover:text-cream-400 flex-shrink-0" />
                 <span className="text-sm leading-relaxed">32 Galle, <br />Elpitiya Rd,<br />Kurundugahahetekma</span>

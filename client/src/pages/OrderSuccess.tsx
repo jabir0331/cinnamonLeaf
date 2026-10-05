@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Clock, ArrowLeft, XCircle, Home, Phone, ChefHat, Truck, ShoppingBag, Info } from 'lucide-react';
 import { verifyPaymentSession } from '../services/api';
+import { clearStoredCart } from '../utils/cartStorage';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -40,6 +41,7 @@ interface OrderDetails {
     };
     totalAmount: number;
     orderStatus: string;
+    isNewCustomer?: boolean;
     createdAt: string;
   };
 }
@@ -79,6 +81,8 @@ const OrderSuccess: React.FC = () => {
         console.log('Verification result:', result);
         
         if (result.success && result.paymentStatus === 'paid') {
+          // The order is paid for, so the saved cart has done its job
+          clearStoredCart();
           setOrderDetails(result);
           // Don't show success toast here - the visual success state is enough
         } else {
@@ -385,10 +389,12 @@ const OrderSuccess: React.FC = () => {
                   What's Next?
                 </h3>
                 <ul className="text-left text-sage-green-800 space-y-3 text-sm">
-                  <li className="flex items-start gap-2">
-                    <Phone size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
-                    We'll call you shortly to confirm your order details
-                  </li>
+                  {orderDetails?.orderDetails?.isNewCustomer !== false && (
+                    <li className="flex items-start gap-2">
+                      <Phone size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
+                      We'll call you shortly to confirm your order details
+                    </li>
+                  )}
                   <li className="flex items-start gap-2">
                     <ChefHat size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
                     Your order is being prepared by our kitchen team

@@ -27,7 +27,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
     useEffect(() => {
         setActiveTab(currentTab.id);
-    }, [location.pathname]);
+    }, [location.pathname, currentTab.id]);
 
     return (
         <div className="min-h-screen bg-warm-brown-50 font-body">

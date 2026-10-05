@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, Power, PowerOff, Image, X, Clock, Utensils, Flame, Salad, Sparkles } from 'lucide-react';
+import { Edit, Power, PowerOff, Image, X, Clock, Flame, Salad, Sparkles } from 'lucide-react';
 import { MenuItem } from '../../../types/menu';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { formatPrice } from '../../../utils/formatPrice';

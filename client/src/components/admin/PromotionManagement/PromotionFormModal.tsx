@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Promotion } from '../../../types/menu';
 import { createPromotion, updatePromotion } from '../../../services/promotions';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { apiServerMessage } from '../../../utils/errors';
 
 interface PromotionFormModalProps {
     isOpen: boolean;
@@ -127,9 +128,9 @@ const PromotionFormModal: React.FC<PromotionFormModalProps> = ({
             } else {
                 toast.error(response.message || 'Failed to save promotion');
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error saving promotion:', error);
-            toast.error(error.response?.data?.message || 'Failed to save promotion');
+            toast.error(apiServerMessage(error) || 'Failed to save promotion');
         } finally {
             setIsSubmitting(false);
         }

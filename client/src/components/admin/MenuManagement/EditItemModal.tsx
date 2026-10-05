@@ -66,7 +66,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
 
     if (!isOpen || !item) return null;
 
-    const handleInputChange = (field: string, value: any) => {
+    const handleInputChange = (field: string, value: string | number | boolean) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         setHasChanges(true);
     };

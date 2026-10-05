@@ -1,9 +1,11 @@
 // client/src/services/order.ts
 import axios from "axios";
+import { describeError } from "../utils/errors";
+import type { OrderPayload } from "../types/cart";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-export const saveOrder = async (orderData: any) => {
+export const saveOrder = async (orderData: OrderPayload) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No auth token found");
@@ -14,10 +16,20 @@ export const saveOrder = async (orderData: any) => {
 
     return response.data;
   } 
-  catch (err: any) {
-    console.error("Error saving order:", err.response?.data || err.message);
+  catch (err) {
+    console.error("Error saving order:", describeError(err));
     throw err;
   }
+};
+
+// Cancels the customer's own unpaid card order (payment setup failed or they backed out of Stripe)
+export const cancelUnpaidOrder = async (orderNumber: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  await axios.put(`${API_URL}/orders/${encodeURIComponent(orderNumber)}/cancel`, {}, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };
 
 export const getUserOrders = async () => {
@@ -30,8 +42,8 @@ export const getUserOrders = async () => {
     });
 
     return response.data;
-  } catch (err: any) {
-    console.error("Error fetching user orders:", err.response?.data || err.message);
+  } catch (err) {
+    console.error("Error fetching user orders:", describeError(err));
     throw err;
   }
 };
@@ -47,8 +59,8 @@ export const getOrders = async () => {
     });
 
     return response.data;
-  } catch (err: any) {
-    console.error("Error fetching orders:", err.response?.data || err.message);
+  } catch (err) {
+    console.error("Error fetching orders:", describeError(err));
     throw err;
   }
 };
@@ -65,8 +77,8 @@ export const updateOrderStatus = async (orderId: string, status: string) => {
     );
 
     return response.data;
-  } catch (err: any) {
-    console.error("Error updating order status:", err.response?.data || err.message);
+  } catch (err) {
+    console.error("Error updating order status:", describeError(err));
     throw err;
   }
 };

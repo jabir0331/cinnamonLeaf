@@ -7,7 +7,7 @@ export const getAllCategories = async () => {
   try {
     const response = await axios.get(`${API_URL}/categories/viewAll`);
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error fetching categories:", err);
     throw err;
   }
@@ -23,7 +23,7 @@ export const createCategory = async (formData: FormData) => {
       }
     });
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error creating category:", err);
     throw err;
   }
@@ -39,7 +39,7 @@ export const updateCategory = async (id: string, formData: FormData) => {
       }
     });
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error updating category:", err);
     throw err;
   }
@@ -52,7 +52,7 @@ export const toggleCategoryStatus = async (id: string) => {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error toggling category status:", err);
     throw err;
   }

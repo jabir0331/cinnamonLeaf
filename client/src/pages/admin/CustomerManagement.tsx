@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { Search, Filter, Eye, Edit, Trash2 } from 'lucide-react';
 
+interface Customer {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  totalOrders: number;
+  totalSpent: string;
+  lastOrder: string;
+  status: string;
+}
+
 const CustomerManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const customers = [
     {
