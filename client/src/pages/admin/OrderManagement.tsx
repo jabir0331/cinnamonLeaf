@@ -1,16 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth, subMonths, isSameMonth, isThisYear } from "date-fns";
 import { toast } from "react-toastify";
-import { Search, Eye, X, Package, User, CreditCard, MapPin, Clock, Phone, Mail, FileText, Truck, BadgeCheck, UtensilsCrossed, PackageCheck } from 'lucide-react';
+import { Search, Eye, X, Package, CreditCard, Clock, Truck, BadgeCheck, UtensilsCrossed, PackageCheck } from 'lucide-react';
 import { getOrders, updateOrderStatus } from '../../services/order';
+import { apiServerMessage } from '../../utils/errors';
+import type { DeliveryInfo } from '../../types/cart';
+
+interface AdminOrderItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface AdminOrder {
+  _id: string;
+  orderNumber: string;
+  items: AdminOrderItem[];
+  deliveryInfo: DeliveryInfo;
+  totalAmount: number;
+  paymentMethod: string;
+  paymentStatus: string;
+  orderStatus: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const OrderManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('Today');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -19,8 +39,8 @@ const OrderManagement: React.FC = () => {
       setLoading(true);
       const response = await getOrders(); // You'll create this function
       setOrders(response.orders || response.data || []);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch orders');
+    } catch (err) {
+      setError(apiServerMessage(err) || 'Failed to fetch orders');
       console.error('Error fetching orders:', err);
     } finally {
       setLoading(false);
@@ -395,11 +415,34 @@ const OrderManagement: React.FC = () => {
                       <div className="px-4 py-3 bg-warm-brown-50 border border-warm-brown-200 rounded-xl font-body">
                         {selectedOrder.deliveryInfo.address}
                       </div>
+                      {selectedOrder.deliveryInfo.location && (
+                        <a
+                          href={`https://www.openstreetmap.org/?mlat=${selectedOrder.deliveryInfo.location.lat}&mlon=${selectedOrder.deliveryInfo.location.lng}#map=18/${selectedOrder.deliveryInfo.location.lat}/${selectedOrder.deliveryInfo.location.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mt-2 text-sm font-body font-medium text-sage-green-700 hover:text-sage-green-800 underline"
+                        >
+                          View pinned location on map
+                        </a>
+                      )}
+                      {selectedOrder.deliveryInfo.landmarks && selectedOrder.deliveryInfo.landmarks.length > 0 && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-medium uppercase tracking-wider text-sage-green-600 font-body">Nearby</span>
+                          {selectedOrder.deliveryInfo.landmarks.map((landmark: { name: string; kind: string; distance: number }) => (
+                            <span
+                              key={landmark.name}
+                              className="rounded-full border border-sage-green-300 bg-sage-green-50 px-3 py-1 text-xs font-body text-sage-green-700"
+                            >
+                              {landmark.name} ({landmark.kind}, ~{landmark.distance} m)
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     {selectedOrder.deliveryInfo.specialNotes && (
                       <div>
                         <label className="block text-sm font-medium text-sage-green-600 uppercase tracking-wider mb-2 font-body">Special Notes</label>
-                        <div className="px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl font-body">
+                        <div className="px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl font-body whitespace-pre-line">
                           {selectedOrder.deliveryInfo.specialNotes}
                         </div>
                       </div>
@@ -411,7 +454,7 @@ const OrderManagement: React.FC = () => {
                 <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
                   <h4 className="text-lg font-display font-semibold text-warm-brown-800 mb-6">Ordered Items</h4>
                   <div className="space-y-4">
-                    {selectedOrder.items.map((item: any, index: number) => (
+                    {selectedOrder.items.map((item, index) => (
                       <div key={index} className="flex justify-between items-center p-4 bg-warm-brown-50 rounded-xl">
                         <div className="flex-1">
                           <p className="font-medium text-warm-brown-900 font-body">{item.name}</p>
@@ -451,7 +494,7 @@ const OrderManagement: React.FC = () => {
                           <div>
                             <p className="text-sm text-sage-green-600 font-medium">Current Status</p>
                             <p className="text-lg font-semibold text-sage-green-800 capitalize">
-                              {selectedOrder.orderStatus.replaceAll('_', ' ')}
+                              {selectedOrder.orderStatus.replace(/_/g, ' ')}
                             </p>
                           </div>
                         </div>
