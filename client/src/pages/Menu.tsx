@@ -122,14 +122,10 @@ const Menu: React.FC = () => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        console.log('Fetching menu items...');
         const data = await getAllMenuItems();
-        console.log('API response:', data);
 
         if (data.success) {
-          console.log('Menu items received:', data.menuItems);
           const transformedData = transformMenuData(data.menuItems);
-          console.log('Transformed data:', transformedData);
           setMenuData(transformedData);
 
           const { removed, priceChanged } = syncWithMenu(data.menuItems);
@@ -257,7 +253,6 @@ const Menu: React.FC = () => {
     try {
       // Save to backend with the same order number
       await saveOrder(orderData);
-      console.log("Order saved successfully with order number:", newOrderNumber);
     } catch (err) {
       // The server rejects orders it can't take (outside the delivery area, cash over the limit)
       const reason = apiErrorStatus(err) === 400 ? apiServerMessage(err) : undefined;

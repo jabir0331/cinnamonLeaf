@@ -104,15 +104,10 @@ const MenuManagement: React.FC = () => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        console.log('Fetching menu items...');
         const data = await getAllMenuItems();
-        console.log('API response:', data);
 
         if (data.success) {
-          console.log('Menu items received:', data.menuItems);
           const { categories: transformedCategories, allItems } = transformMenuData(data.menuItems);
-          console.log('Transformed data:', transformedCategories);
-          console.log('All items:', allItems);
           setMenuData(transformedCategories);
           setAllMenuItems(allItems);
         } else {

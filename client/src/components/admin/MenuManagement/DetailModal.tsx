@@ -23,7 +23,6 @@ const DetailModal: React.FC<DetailModalProps> = ({
 }) => {
   if (!isOpen || !item) return null;
 
-  console.log('MenuItem in view:', item);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-5 animate-in fade-in duration-200" style={{ top: '-5rem', height: 'calc(100vh + 5rem)' }}>

@@ -115,7 +115,6 @@ const SignupPage: React.FC = () => {
       const data = await signupUser({ name, email, phone, password });
 
       toast.success('Account created successfully!');
-      console.log('Signup response:', data);
 
       // Store session in localStorage (same keys as login)
       localStorage.setItem('token', data.token);

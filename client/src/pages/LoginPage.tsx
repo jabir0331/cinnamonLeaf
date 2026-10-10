@@ -85,7 +85,6 @@ const LoginPage: React.FC = () => {
             const data = await loginUser({ email, password });
 
             toast.success('Login Successful!');
-            console.log('Login response:', data);
 
             // Store token in localStorage
             localStorage.setItem('token', data.token);

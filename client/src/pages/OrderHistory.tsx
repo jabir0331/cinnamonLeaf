@@ -68,7 +68,6 @@ const OrderHistory: React.FC = () => {
                 const data = await getUserOrders();
                 if (data.success) {
                     setOrders(data.orders);
-                    console.log(data.orders);
                 } else {
                     toast.error(data.message || 'Failed to fetch orders');
                 }
