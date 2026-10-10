@@ -70,6 +70,7 @@ const Home: React.FC = () => {
           className="absolute inset-0 w-full h-full object-cover"
           src="/videos/heroBgVid.mp4"
           poster={landingImg}
+          preload="auto"
           autoPlay
           loop
           muted
