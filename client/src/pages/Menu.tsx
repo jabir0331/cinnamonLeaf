@@ -9,7 +9,6 @@ import { useCart } from '../hooks/useCart';
 import CartButton from '../components/CartButton';
 import Cart from '../components/Cart';
 import CheckoutModal from '../components/CheckoutModal';
-import ConfirmationModal from '../components/ConfirmationModal';
 import { DeliveryInfo, OrderPayload } from '../types/cart';
 import { getAllMenuItems } from '../services/menuItems';
 import { saveOrder, cancelUnpaidOrder } from "../services/order";
@@ -73,9 +72,6 @@ const Menu: React.FC = () => {
     return requested ? mapCategoryNameToKey(requested) : 'starters';
   });
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const [orderNumber, setOrderNumber] = useState('');
-  const [isNewCustomer, setIsNewCustomer] = useState(true);
 
   // Add refs to prevent duplicate toasts
   const toastIdRef = useRef<Id | null>(null);
@@ -258,11 +254,9 @@ const Menu: React.FC = () => {
       paymentStatus: 'pending'
     };
 
-    let savedIsNewCustomer = true;
     try {
       // Save to backend with the same order number
-      const saved = await saveOrder(orderData);
-      savedIsNewCustomer = saved?.order?.isNewCustomer !== false;
+      await saveOrder(orderData);
       console.log("Order saved successfully with order number:", newOrderNumber);
     } catch (err) {
       // The server rejects orders it can't take (outside the delivery area, cash over the limit)
@@ -310,20 +304,14 @@ const Menu: React.FC = () => {
       return;
     }
     else {
-      // Handle COD order
-      setOrderNumber(newOrderNumber);
-      setIsNewCustomer(savedIsNewCustomer);
+      // Handle COD order: the order confirmation page shows it, the same way it shows card orders
       setIsCheckoutOpen(false);
-      setIsConfirmationOpen(true);
       clearCart();
-
-      // Dismiss all toasts and show success message
+      // Drop the "added to cart" toasts that are still showing or waiting in line
+      // (clear the queue first, otherwise dismissing the visible one lets the next one in)
+      toast.clearWaitingQueue();
       toast.dismiss();
-      setTimeout(() => {
-        toastIdRef.current = toast.success(
-          savedIsNewCustomer ? 'Order confirmed! We\'ll call you shortly.' : 'Order confirmed! We\'re getting it ready.'
-        );
-      }, 100);
+      navigate(`/order-success?order=${encodeURIComponent(newOrderNumber)}`);
     }
 
     // Reset processing flag after a delay
@@ -385,15 +373,6 @@ const Menu: React.FC = () => {
         onClose={() => setIsCheckoutOpen(false)}
         onConfirm={handleConfirmOrder}
         totalPrice={getTotalPrice()}
-      />
-
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isConfirmationOpen}
-        onClose={() => setIsConfirmationOpen(false)}
-        orderNumber={orderNumber}
-        isNewCustomer={isNewCustomer}
-        estimatedDelivery="30-45 minutes"
       />
 
       {/* Menu Navigation */}

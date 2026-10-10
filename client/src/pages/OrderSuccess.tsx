@@ -1,438 +1,223 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Clock, ArrowLeft, XCircle, Home, Phone, ChefHat, Truck, ShoppingBag, Info } from 'lucide-react';
-import { verifyPaymentSession } from '../services/api';
-import { clearStoredCart } from '../utils/cartStorage';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Home, XCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import OrderConfirmation from '../components/OrderConfirmation';
+import loginBackground from '../assets/images/loginBg.png';
+import { useScrollToTop } from '../hooks/useScrollToTop';
+import { verifyPaymentSession } from '../services/api';
+import { getOrderByNumber } from '../services/order';
+import type { ConfirmedOrder } from '../types/cart';
+import { clearStoredCart } from '../utils/cartStorage';
+import { apiErrorStatus } from '../utils/errors';
+import { orderFromApi, orderFromVerifiedSession, isActiveOrder } from '../utils/orderConfirmation';
+import { addOrderToCart } from '../utils/reorder';
 
-interface OrderItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  category: string;
+// How often the status of an order that is still on its way is checked again
+const REFRESH_INTERVAL_MS = 30 * 1000;
+
+interface LoadError {
+  title: string;
+  message: string;
 }
 
-interface OrderDetails {
-  success: boolean;
-  paymentStatus: string;
-  customerDetails?: {
-    name: string;
-    email: string;
-    phone?: string;
-  };
-  metadata?: {
-    orderNumber: string;
-    customerName: string;
-    customerPhone: string;
-    deliveryAddress: string;
-    totalAmount: string;
-    orderItems: string;
-  };
-  orderDetails?: {
-    orderNumber: string;
-    items: OrderItem[];
-    deliveryInfo: {
-      name: string;
-      phone: string;
-      email?: string;
-      address: string;
-    };
-    totalAmount: number;
-    orderStatus: string;
-    isNewCustomer?: boolean;
-    createdAt: string;
-  };
+interface OrderSuccessProps {
+  // confirmation = right after checkout (/order-success), details = opened from the order history (/orders/:orderNumber)
+  mode?: 'confirmation' | 'details';
 }
 
-const OrderSuccess: React.FC = () => {
+// The order page. Card orders arrive from Stripe with a session id that is checked before the order is shown.
+// Everything else is loaded by order number for the signed-in customer.
+const OrderSuccess: React.FC<OrderSuccessProps> = ({ mode = 'confirmation' }) => {
   const [searchParams] = useSearchParams();
+  const { orderNumber: routeOrderNumber } = useParams();
   const navigate = useNavigate();
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
-  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const location = useLocation();
+  const [order, setOrder] = useState<ConfirmedOrder | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<LoadError | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useScrollToTop();
 
   useEffect(() => {
-    // Clear any existing toasts when component mounts
+    // Clear any toasts left over from the menu page, including ones still waiting in line
+    toast.clearWaitingQueue();
     toast.dismiss();
 
     const sessionId = searchParams.get('session_id');
-    const canceled = searchParams.get('canceled');
+    const orderNumber = routeOrderNumber ?? searchParams.get('order');
+    let isCurrent = true;
 
-    // Check if payment was canceled
-    if (canceled === 'true') {
-      toast.info('Payment was canceled');
-      navigate('/menu');
-      return;
-    }
-    
-    if (!sessionId) {
-      setVerificationError('Invalid payment session');
-      setIsVerifying(false);
-      return;
-    }
-
-    const verifyPayment = async () => {
+    const load = async () => {
       try {
-        console.log('Verifying payment for session:', sessionId);
-        const result = await verifyPaymentSession(sessionId);
-        
-        console.log('Verification result:', result);
-        
-        if (result.success && result.paymentStatus === 'paid') {
+        if (sessionId) {
+          const result = await verifyPaymentSession(sessionId);
+          if (!(result.success && result.paymentStatus === 'paid')) {
+            throw new Error(`We couldn't confirm your payment (${result.paymentStatus || 'unknown status'}). If you were charged, please contact us.`);
+          }
           // The order is paid for, so the saved cart has done its job
           clearStoredCart();
-          setOrderDetails(result);
-          // Don't show success toast here - the visual success state is enough
-        } else {
-          setVerificationError(`Payment verification failed: ${result.paymentStatus || 'Unknown status'}`);
+          if (isCurrent) {
+            setOrder(orderFromVerifiedSession(result));
+            setLastUpdated(new Date());
+          }
+        } else if (orderNumber) {
+          if (!localStorage.getItem('token')) {
+            navigate('/login', { replace: true, state: { from: location.pathname + location.search } });
+            return;
+          }
+          const data = await getOrderByNumber(orderNumber);
+          if (isCurrent) {
+            setOrder(orderFromApi(data.order));
+            setLastUpdated(new Date());
+          }
+        } else if (isCurrent) {
+          setLoadError({ title: 'Order not found', message: "We couldn't find an order to show. Check your link or open your orders." });
         }
       } catch (error) {
-        console.error('Payment verification error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Failed to verify payment';
-        setVerificationError(errorMessage);
-        // Only show error toasts
-        toast.error(errorMessage);
+        console.error('Could not load the order:', error);
+        if (!isCurrent) return;
+        if (sessionId) {
+          setLoadError({
+            title: 'Payment verification failed',
+            message: error instanceof Error ? error.message : "We couldn't verify your payment. Please contact us if you were charged.",
+          });
+        } else {
+          setLoadError({
+            title: 'Order not found',
+            message: apiErrorStatus(error) === 404
+              ? "We couldn't find this order on your account."
+              : "We couldn't load your order. Please try again in a moment.",
+          });
+        }
       } finally {
-        setIsVerifying(false);
+        if (isCurrent) setIsLoading(false);
       }
     };
 
-    verifyPayment();
-  }, [searchParams, navigate]);
+    load();
+    return () => { isCurrent = false; };
+  }, [searchParams, routeOrderNumber, navigate, location.pathname, location.search]);
 
-  // Get order number from either orderDetails or metadata
-  const getOrderNumber = (): string => {
-    if (orderDetails?.orderDetails?.orderNumber) {
-      return orderDetails.orderDetails.orderNumber;
+  const orderNumber = order?.orderNumber;
+  const isOnItsWay = order ? isActiveOrder(order.orderStatus) : false;
+
+  // Loads the order again, so a status the kitchen has changed shows up. If it fails, the last known state stays on screen.
+  const refresh = useCallback(async (isManual = false) => {
+    if (!orderNumber || !localStorage.getItem('token')) return;
+    if (isManual) setIsRefreshing(true);
+    try {
+      const data = await getOrderByNumber(orderNumber);
+      setOrder(orderFromApi(data.order));
+      setLastUpdated(new Date());
+    } catch {
+      // Keep showing what we have
+    } finally {
+      if (isManual) setIsRefreshing(false);
     }
-    if (orderDetails?.metadata?.orderNumber) {
-      return orderDetails.metadata.orderNumber;
+  }, [orderNumber]);
+
+  // While the order is still on its way, check it every 30 seconds and when the tab is opened again.
+  // Delivered and cancelled orders no longer change, so they are not checked.
+  useEffect(() => {
+    if (!orderNumber || !isOnItsWay) return;
+
+    const refreshIfVisible = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    const timer = setInterval(refreshIfVisible, REFRESH_INTERVAL_MS);
+    document.addEventListener('visibilitychange', refreshIfVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refreshIfVisible);
+    };
+  }, [orderNumber, isOnItsWay, refresh]);
+
+  const backTarget = (() => {
+    const from = (location.state as { from?: string } | null)?.from;
+    return typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') ? from : '/orderHistory';
+  })();
+
+  const handleReorder = () => {
+    if (!order) return;
+    if (addOrderToCart(order.items) === 0) {
+      toast.info('These items are no longer available to reorder.');
+      return;
     }
-    return 'N/A';
+    toast.success('Items from this order were added to your cart.');
+    navigate('/menu', { state: { resumeCheckout: true } });
   };
-
-  // Get customer name
-  const getCustomerName = (): string => {
-    if (orderDetails?.orderDetails?.deliveryInfo?.name) {
-      return orderDetails.orderDetails.deliveryInfo.name;
-    }
-    if (orderDetails?.customerDetails?.name) {
-      return orderDetails.customerDetails.name;
-    }
-    if (orderDetails?.metadata?.customerName) {
-      return orderDetails.metadata.customerName;
-    }
-    return 'N/A';
-  };
-
-  // Get customer email
-  const getCustomerEmail = (): string => {
-    if (orderDetails?.orderDetails?.deliveryInfo?.email) {
-      return orderDetails.orderDetails.deliveryInfo.email;
-    }
-    if (orderDetails?.customerDetails?.email) {
-      return orderDetails.customerDetails.email;
-    }
-    return '';
-  };
-
-  // Get customer phone
-  const getCustomerPhone = (): string => {
-    if (orderDetails?.orderDetails?.deliveryInfo?.phone) {
-      return orderDetails.orderDetails.deliveryInfo.phone;
-    }
-    if (orderDetails?.metadata?.customerPhone) {
-      return orderDetails.metadata.customerPhone;
-    }
-    return '';
-  };
-
-  // Get delivery address
-  const getDeliveryAddress = (): string => {
-    if (orderDetails?.orderDetails?.deliveryInfo?.address) {
-      return orderDetails.orderDetails.deliveryInfo.address;
-    }
-    if (orderDetails?.metadata?.deliveryAddress) {
-      return orderDetails.metadata.deliveryAddress;
-    }
-    return '';
-  };
-
-  // Get order items
-  const getOrderItems = (): OrderItem[] => {
-    // First try to get from orderDetails (database)
-    if (orderDetails?.orderDetails?.items && Array.isArray(orderDetails.orderDetails.items)) {
-      return orderDetails.orderDetails.items;
-    }
-
-    // Fallback to metadata (Stripe session)
-    if (orderDetails?.metadata?.orderItems) {
-      try {
-        const parsedItems = JSON.parse(orderDetails.metadata.orderItems);
-        return Array.isArray(parsedItems) ? parsedItems : [];
-      } catch (error) {
-        console.error('Failed to parse order items from metadata:', error);
-        return [];
-      }
-    }
-
-    return [];
-  };
-
-  // Get total amount
-  const getTotalAmount = (): number => {
-    if (orderDetails?.orderDetails?.totalAmount) {
-      return orderDetails.orderDetails.totalAmount;
-    }
-    if (orderDetails?.metadata?.totalAmount) {
-      return parseFloat(orderDetails.metadata.totalAmount);
-    }
-    return 0;
-  };
-
-  // Format order creation date
-  const getOrderDate = (): string => {
-    if (orderDetails?.orderDetails?.createdAt) {
-      return new Date(orderDetails.orderDetails.createdAt).toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-    return new Date().toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const orderItems = getOrderItems();
-  const totalAmount = getTotalAmount();
-  const customerName = getCustomerName();
-  const customerEmail = getCustomerEmail();
-  const customerPhone = getCustomerPhone();
-  const deliveryAddress = getDeliveryAddress();
-  const orderNumber = getOrderNumber();
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div
+      className="flex min-h-screen flex-col bg-cover bg-left-top bg-no-repeat px-4 py-8 sm:py-12"
+      style={{ backgroundImage: `url(${loginBackground})` }}
+    >
+      {/* my-auto centres a short card (loading, error) in the page, while a long order stays top aligned */}
+      <div className="mx-auto my-auto w-full max-w-3xl">
+        {isLoading && (
+          <div className="rounded-3xl bg-white p-10 text-center shadow-2xl sm:p-14">
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-sage-green-600" />
+            <p className="font-body text-warm-brown-600">Loading your order...</p>
+          </div>
+        )}
 
-      {/* Main Content */}
-      <div className="py-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Loading State */}
-          {isVerifying && (
-            <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sage-green-600 mx-auto mb-4"></div>
-              <p className="text-warm-brown-600 font-body">Verifying your payment...</p>
+        {!isLoading && loadError && (
+          <div className="rounded-3xl bg-white p-8 text-center shadow-2xl sm:p-12">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <XCircle className="h-8 w-8 text-red-600" />
             </div>
-          )}
-
-          {/* Error State */}
-          {!isVerifying && (verificationError || !orderDetails) && (
-            <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12 text-center">
-              {/* Error Icon */}
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
-                <XCircle className="h-8 w-8 text-red-600" />
-              </div>
-
-              {/* Error Message */}
-              <h1 className="font-display text-3xl font-bold text-warm-brown-700 mb-4">
-                Payment Verification Failed
-              </h1>
-              
-              <p className="font-body text-lg text-warm-brown-600 mb-8">
-                {verificationError || 'We couldn\'t verify your payment. Please contact support if you were charged.'}
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <h1 className="mb-3 font-display text-3xl font-bold text-warm-brown-800">{loadError.title}</h1>
+            <p className="mb-8 font-body text-warm-brown-600">{loadError.message}</p>
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+              {mode === 'details' ? (
                 <button
-                  onClick={() => navigate('/menu')}
-                  className="flex items-center justify-center gap-2 bg-sage-green-600 hover:bg-sage-green-700 text-white font-body font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+                  type="button"
+                  onClick={() => navigate(backTarget)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-warm-brown-100 px-5 py-2.5 font-body text-sm font-medium text-warm-brown-800 transition-colors hover:bg-warm-brown-200"
                 >
-                  <ArrowLeft size={16} />
-                  Back to Menu
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to order history
                 </button>
-                
+              ) : (
                 <button
+                  type="button"
                   onClick={() => navigate('/')}
-                  className="flex items-center justify-center gap-2 bg-warm-brown-100 hover:bg-warm-brown-200 text-warm-brown-700 font-body font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-warm-brown-100 px-5 py-2.5 font-body text-sm font-medium text-warm-brown-800 transition-colors hover:bg-warm-brown-200"
                 >
-                  <Home size={16} />
-                  Go to Homepage
+                  <Home className="h-4 w-4" />
+                  Go to homepage
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* Success State */}
-          {!isVerifying && orderDetails && (
-            <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12 text-center">
-              {/* Success Icon with subtle animation */}
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6 animate-pulse">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-
-              {/* Success Message */}
-              <div className="mb-8">
-                <h1 className="font-display text-3xl font-bold text-warm-brown-700 mb-2">
-                  Payment Successful!
-                </h1>
-                <p className="font-body text-m text-warm-brown-600">
-                  Thank you for your order. Your payment has been processed successfully.
-                </p>
-              </div>
-
-              {/* Order Details */}
-              <div className="bg-cream-50 rounded-xl p-6 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div className="text-left">
-                    <span className="font-medium text-warm-brown-700">Order Number:</span>
-                    <p className="font-body text-sage-green-600 font-semibold">{orderNumber}</p>
-                  </div>
-                  
-                  <div className="text-left md:text-right">
-                    <span className="font-medium text-warm-brown-700">Status:</span>
-                    <p className="font-body text-green-600 font-semibold flex items-center gap-1 md:justify-end">
-                      <CheckCircle size={14} /> Confirmed
-                    </p>
-                  </div>
-                  
-                  {customerName && customerName !== 'N/A' && (
-                    <div className="text-left">
-                      <span className="font-medium text-warm-brown-700">Customer:</span>
-                      <p className="font-body text-warm-brown-600">{customerName}</p>
-                    </div>
-                  )}
-                  
-                  {customerEmail && (
-                    <div className="text-left md:text-right">
-                      <span className="font-medium text-warm-brown-700">Email:</span>
-                      <p className="font-body text-warm-brown-600">{customerEmail}</p>
-                    </div>
-                  )}
-
-                  {customerPhone && (
-                    <div className="text-left">
-                      <span className="font-medium text-warm-brown-700">Phone:</span>
-                      <p className="font-body text-warm-brown-600">{customerPhone}</p>
-                    </div>
-                  )}
-
-                  <div className="text-left md:text-right">
-                    <span className="font-medium text-warm-brown-700">Order Date:</span>
-                    <p className="font-body text-warm-brown-600">{getOrderDate()}</p>
-                  </div>
-
-                  {deliveryAddress && (
-                    <div className="text-left md:col-span-2">
-                      <span className="font-medium text-warm-brown-700">Delivery Address:</span>
-                      <p className="font-body text-warm-brown-600">{deliveryAddress}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Order Items */}
-              {orderItems.length > 0 && (
-                <div className="bg-cream-50 rounded-xl p-6 mb-8">
-                  <h3 className="font-body font-semibold text-warm-brown-700 text-lg mb-5 flex items-center justify-center gap-2">
-                    <ShoppingBag size={18} />
-                    Order Items
-                  </h3>
-                  <div className="space-y-3 mb-4">
-                    {orderItems.map((item: OrderItem, index: number) => (
-                      <div key={index} className="flex justify-between items-center text-sm border-b border-cream-200 pb-2 last:border-b-0">
-                        <div className="text-left">
-                          <span className="text-warm-brown-700 font-medium">
-                            {item.quantity}x {item.name}
-                          </span>
-                          {item.category && (
-                            <p className="text-xs text-warm-brown-500 mt-1">
-                              {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
-                            </p>
-                          )}
-                        </div>
-                        <span className="font-medium text-warm-brown-700">
-                          LKR {(item.price * item.quantity).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Total Amount */}
-                  <div className="border-t border-cream-200 pt-4">
-                    <div className="flex justify-between items-center">
-                      <span className="font-body font-semibold text-warm-brown-700 text-base">
-                        Total Amount
-                      </span>
-                      <span className="font-body font-bold text-sage-green-600 text-xl">
-                        LKR {totalAmount.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               )}
-
-              {/* Next Steps */}
-              <div className="bg-sage-green-50 rounded-xl p-6 mb-8">
-                <h3 className="font-body font-semibold text-sage-green-900 mb-4 flex items-center justify-center gap-2">
-                  <Info size={18} />
-                  What's Next?
-                </h3>
-                <ul className="text-left text-sage-green-800 space-y-3 text-sm">
-                  {orderDetails?.orderDetails?.isNewCustomer !== false && (
-                    <li className="flex items-start gap-2">
-                      <Phone size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
-                      We'll call you shortly to confirm your order details
-                    </li>
-                  )}
-                  <li className="flex items-start gap-2">
-                    <ChefHat size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
-                    Your order is being prepared by our kitchen team
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Clock size={16} className="text-sage-green-600 mt-0.5 flex-shrink-0" />
-                    You'll receive updates about your delivery status
-                  </li>
-                </ul>
-              </div>
-
-              {/* Delivery Info */}
-              <div className="flex items-center justify-center gap-2 text-sage-green-600 mb-8 bg-sage-green-50 rounded-lg p-4">
-                <Truck size={20} />
-                <span className="font-body font-medium">Estimated Delivery: 30-45 minutes</span>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => navigate('/menu')}
-                  className="flex items-center justify-center gap-2 bg-sage-green-600 hover:bg-sage-green-700 text-white font-body font-medium py-3 px-6 rounded-lg transition-colors duration-200"
-                >
-                  <ArrowLeft size={16} />
-                  Order More Items
-                </button>
-                
-                <button
-                  onClick={() => navigate('/')}
-                  className="flex items-center justify-center gap-2 bg-warm-brown-100 hover:bg-warm-brown-200 text-warm-brown-700 font-body font-medium py-3 px-6 rounded-lg transition-colors duration-200"
-                >
-                  <Home size={16} />
-                  Go to Homepage
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/menu')}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-sage-green-600 px-5 py-2.5 font-body text-sm font-medium text-white transition-colors hover:bg-sage-green-700"
+              >
+                View menu
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {!isLoading && order && (
+          <OrderConfirmation
+            order={order}
+            mode={mode}
+            lastUpdated={lastUpdated}
+            isRefreshing={isRefreshing}
+            onRefresh={() => refresh(true)}
+            onGoHome={() => navigate('/')}
+            onOrderMore={() => navigate('/menu')}
+            onViewOrders={() => navigate('/orderHistory')}
+            onBackToHistory={() => navigate(backTarget)}
+            onReorder={handleReorder}
+          />
+        )}
       </div>
     </div>
   );

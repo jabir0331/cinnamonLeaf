@@ -60,6 +60,7 @@ function App() {
 
           {/* Routes that don't use the Layout component */}
           <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/orders/:orderNumber" element={<OrderSuccess mode="details" />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/401" element={<Unauthorized />} />

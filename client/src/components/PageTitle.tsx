@@ -28,7 +28,8 @@ const PageTitle: React.FC = () => {
     const location = useLocation();
 
     useEffect(() => {
-        const pageName = PAGE_TITLES[location.pathname] || 'Page Not Found';
+        const pageName = PAGE_TITLES[location.pathname]
+            || (location.pathname.startsWith('/orders/') ? 'Order Details' : 'Page Not Found');
         document.title = `Cinnamon Leaf | ${pageName}`;
     }, [location.pathname]);
 
