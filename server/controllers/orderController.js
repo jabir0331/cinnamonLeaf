@@ -99,7 +99,6 @@ exports.getMyOrders = async (req, res) => {
   try {
     await cancelAbandonedCardOrders();
     const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 });
-    console.log(orders);
     
     res.json({ success: true, orders });
   } catch (err) {

@@ -111,11 +111,8 @@ exports.createMenuItem = [
 // Get all menu items
 exports.getAllMenuItems = async (req, res) => {
   try {
-    console.log('Fetching all menu items from database...');
-
-    // Sort by creation date ascending
+    // Sort by name
     const menuItems = await MenuItem.find().sort({ name: 1 });
-    console.log('Found', menuItems.length, 'menu items');
 
     res.status(200).json({
       success: true,

@@ -12,8 +12,6 @@ const router = express.Router();
 // Create Stripe checkout session
 router.post('/create-session', async (req, res) => {
   try {
-    console.log('Received checkout request:', req.body);
-
     const { items, deliveryInfo, orderNumber } = req.body;
 
     if (!deliveryInfo || !deliveryInfo.name || !deliveryInfo.phone) {
@@ -53,11 +51,6 @@ router.post('/create-session', async (req, res) => {
       quantity: item.quantity,
     }));
 
-    console.log('Line items created:', lineItems);
-
-    // Use the order number passed from frontend (no need to generate a new one)
-    console.log('Using order number from frontend:', orderNumber);
-
     const orderItemsMetadata = JSON.stringify(resolvedItems.map(({ id, name, price, quantity, category }) => (
       { id, name, price, quantity, category }
     )));
@@ -95,13 +88,6 @@ router.post('/create-session', async (req, res) => {
       },
     });
 
-    console.log('Stripe session created:', {
-      id: session.id,
-      url: session.url,
-      status: session.status,
-      orderNumber: orderNumber
-    });
-
     res.json({
       success: true,
       checkoutUrl: session.url,
@@ -123,16 +109,7 @@ router.get('/verify-session/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
 
-    console.log('Verifying session:', sessionId);
-
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-    console.log('Session retrieved:', {
-      id: session.id,
-      payment_status: session.payment_status,
-      customer_details: session.customer_details,
-      metadata: session.metadata
-    });
 
     if (session.payment_status === 'paid') {
       // Update order status in database
@@ -326,8 +303,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       const paymentIntent = event.data.object;
       console.log('Payment failed for:', paymentIntent.id);
       break;
-    default:
-      console.log(`Unhandled event type ${event.type}`);
   }
 
   res.json({ received: true });
