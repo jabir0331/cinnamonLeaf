@@ -80,6 +80,21 @@ exports.cancelUnpaidCardOrder = async (req, res) => {
   }
 };
 
+// One of the signed-in customer's own orders, for the order confirmation page
+exports.getOrderByNumber = async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderNumber: req.params.orderNumber, userId: req.user.id });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.getMyOrders = async (req, res) => {
   try {
     await cancelAbandonedCardOrders();
