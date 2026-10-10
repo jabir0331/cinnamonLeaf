@@ -1,15 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Circle, MapContainer, TileLayer, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
-import { LocateFixed, Pencil, Search } from 'lucide-react';
-import { getLandmarkIcon } from '../utils/landmarkIcons';
+import { LocateFixed, Search } from 'lucide-react';
+import NearbyLandmarks from './NearbyLandmarks';
 import { DELIVERY_RADIUS_KM, RESTAURANT_LOCATION } from '../config/restaurant';
+import { TILE_SOURCES } from '../config/mapTiles';
 import { isWithinDeliveryZone, outsideZoneMessage } from '../utils/deliveryZone';
 import 'leaflet/dist/leaflet.css';
-import { LatLng, PlaceResult, ResolvedAddress, findNearbyLandmarks, reverseGeocode, searchPlaces } from '../utils/geocoding';
+import { LatLng, PlaceResult, ResolvedAddress, lookupLocation, searchPlaces } from '../utils/geocoding';
 import { Landmark } from '../types/cart';
 
 // Fallback map centre (the restaurant's area) when the user's position is unavailable
-const DEFAULT_CENTER: LatLng = { lat: 6.2899, lng: 80.1604 };
+const DEFAULT_CENTER: LatLng = RESTAURANT_LOCATION;
+// A source is given up on after this many failed tiles with none loaded (a stray failure is normal)
+const TILE_FAILURES_BEFORE_SWITCH = 3;
+// The tile source that last worked, so reopening the map (until the page is reloaded) does not wait for
+// a blocked source to fail all over again
+let workingTileSourceIndex = 0;
+
 // Keep the map within Sri Lanka - the restaurant only delivers locally
 const SRI_LANKA_BOUNDS: [[number, number], [number, number]] = [[5.7, 79.4], [10.0, 82.1]];
 
@@ -17,9 +24,10 @@ interface LocationPickerProps {
   initialLocation?: LatLng;
   // true = always start from the device GPS; false = resume from `initialLocation` if there is one
   useCurrentLocation: boolean;
-  // `address` is null when the street address couldn't be looked up
-  onConfirm: (address: string | null, location: LatLng, landmarks: Landmark[]) => void;
-  onManual: () => void;
+  // `place` is null when the street address couldn't be looked up
+  onConfirm: (place: ResolvedAddress | null, location: LatLng, landmarks: Landmark[]) => void;
+  // Leave the picker without choosing a location
+  onCancel: () => void;
 }
 
 const roundCoord = (value: number) => Math.round(value * 1e6) / 1e6;
@@ -59,7 +67,7 @@ const PinIcon: React.FC = () => (
   </svg>
 );
 
-const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCurrentLocation, onConfirm, onManual }) => {
+const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCurrentLocation, onConfirm, onCancel }) => {
   const resumeLocation = !useCurrentLocation ? initialLocation : undefined;
   const startPoint = resumeLocation ?? DEFAULT_CENTER;
 
@@ -69,6 +77,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCur
   const [center, setCenter] = useState<LatLng>(startPoint);
   const [flyTarget, setFlyTarget] = useState<LatLng | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [tileSourceIndex, setTileSourceIndex] = useState(workingTileSourceIndex);
+  const [tilesUnavailable, setTilesUnavailable] = useState(false);
+  const tileStats = useRef({ loaded: 0, failed: 0 });
   // The pin only counts as "set" once we have a real position (GPS, search, or
   // the user touching the map) - never for the untouched fallback centre
   const [isPinSet, setIsPinSet] = useState(!!resumeLocation);
@@ -84,6 +95,27 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCur
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchMessage, setSearchMessage] = useState('');
+
+  const tileSource = TILE_SOURCES[tileSourceIndex];
+
+  const handleTileLoad = () => {
+    tileStats.current.loaded += 1;
+    if (tilesUnavailable) setTilesUnavailable(false);
+  };
+
+  const handleTileError = () => {
+    const stats = tileStats.current;
+    stats.failed += 1;
+    if (stats.loaded > 0 || stats.failed < TILE_FAILURES_BEFORE_SWITCH) return;
+
+    tileStats.current = { loaded: 0, failed: 0 };
+    if (tileSourceIndex + 1 < TILE_SOURCES.length) {
+      workingTileSourceIndex = tileSourceIndex + 1;
+      setTileSourceIndex(workingTileSourceIndex);
+    } else {
+      setTilesUnavailable(true);
+    }
+  };
 
   const moveTo = (point: LatLng) => {
     setCenter(point);
@@ -122,7 +154,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCur
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Look up the street address for the pin whenever it settles
+  // Look up the address and nearby landmarks for the pin whenever it settles (one request for both)
   useEffect(() => {
     if (!isPinSet) return;
 
@@ -131,22 +163,18 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCur
     setAddressError('');
 
     const timer = setTimeout(async () => {
-      // Landmarks are a nice-to-have: if that lookup fails the address still works
-      const landmarkLookup = findNearbyLandmarks(center, controller.signal).catch(() => [] as Landmark[]);
-
       try {
-        const result = await reverseGeocode(center, controller.signal);
-        setResolved(result);
-        if (!result) setAddressError('No address found here. Move the pin, or type the address yourself.');
+        const details = await lookupLocation(center, controller.signal);
+        if (controller.signal.aborted) return;
+        setResolved(details.address);
+        setLandmarks(details.landmarks);
+        if (!details.address) setAddressError('No address found here. You can still confirm the pin.');
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') return;
+        if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) return;
         setResolved(null);
-        setAddressError("Couldn't look up this address. You can still confirm the pin and type it in.");
+        setLandmarks([]);
+        setAddressError("Couldn't look up this address. You can still confirm the pin.");
       }
-
-      const nearby = await landmarkLookup;
-      if (controller.signal.aborted) return;
-      setLandmarks(nearby);
       setIsResolving(false);
     }, 400);
 
@@ -289,10 +317,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCur
           className="h-full w-full"
         >
           <TileLayer
-            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            key={tileSource.url}
+            url={tileSource.url}
+            attribution={tileSource.attribution}
+            subdomains={tileSource.subdomains ?? 'abc'}
             maxZoom={19}
             noWrap
+            eventHandlers={{ tileload: handleTileLoad, tileerror: handleTileError }}
           />
           <Circle
             center={[RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng]}
@@ -309,14 +340,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCur
           <FlyTo target={flyTarget} />
         </MapContainer>
 
-        <button
-          type="button"
-          onClick={onManual}
-          className="absolute left-3 top-3 z-[1000] flex items-center gap-2 rounded-full bg-white px-4 py-2 font-body text-sm font-medium text-warm-brown-700 shadow-md hover:bg-cream-50 transition-colors"
-        >
-          <Pencil size={14} />
-          Enter address manually
-        </button>
+        {tilesUnavailable && (
+          <div className="pointer-events-none absolute bottom-7 left-3 right-16 z-[1000] rounded-xl bg-white/95 px-4 py-2.5 text-center font-body text-xs text-warm-brown-700 shadow-md">
+            The map couldn&apos;t be loaded. You can still search for your address or tap the location button to set your pin.
+          </div>
+        )}
 
         {/* Fixed centre pin - the map moves underneath it */}
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-[1000] flex -translate-x-1/2 -translate-y-full flex-col items-center">
@@ -371,41 +399,24 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialLocation, useCur
           )}
         </div>
 
-        {isPinSet && !isResolving && landmarks.length > 0 && (
-          <div className="border-t border-dashed border-cream-300 px-5 py-4">
-            <div className="flex items-baseline justify-between gap-3">
-              <p className="font-body text-sm font-semibold text-warm-brown-700">Nearby landmarks</p>
-              <p className="font-body text-xs text-warm-brown-400">Helps your rider find you</p>
-            </div>
-            <ul className="mt-3 space-y-3">
-              {landmarks.map(landmark => {
-                const Icon = getLandmarkIcon(landmark.kind);
-                return (
-                  <li key={landmark.name} className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-cream-100">
-                      <Icon size={18} className="text-warm-brown-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-body text-sm font-semibold text-warm-brown-800">{landmark.name}</p>
-                      <p className="font-body text-xs text-warm-brown-500">{landmark.kind}</p>
-                    </div>
-                    <p className="flex-shrink-0 font-body text-sm font-semibold text-warm-brown-700">{landmark.distance} m</p>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
+        {isPinSet && !isResolving && <NearbyLandmarks landmarks={landmarks} />}
       </div>
       {isPinSet && locateError && <p className="mt-2 font-body text-xs text-red-500">{locateError}</p>}
 
       <button
         type="button"
-        onClick={() => onConfirm(resolved?.label ?? null, center, landmarks)}
+        onClick={() => onConfirm(resolved, center, landmarks)}
         disabled={!canConfirm}
         className="mt-3 w-full rounded-xl border border-sage-green-300 bg-white py-3 font-body text-base font-semibold text-sage-green-700 transition-colors hover:bg-sage-green-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
         Confirm this location
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="mt-2 w-full rounded-xl border border-warm-brown-300 bg-white py-3 font-body text-base font-medium text-warm-brown-500 transition-colors hover:bg-warm-brown-50"
+      >
+        Cancel
       </button>
     </div>
   );

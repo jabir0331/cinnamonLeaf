@@ -174,6 +174,8 @@ router.get('/verify-session/:sessionId', async (req, res) => {
                 deliveryInfo: updatedOrder.deliveryInfo,
                 totalAmount: updatedOrder.totalAmount,
                 orderStatus: updatedOrder.orderStatus,
+                paymentMethod: updatedOrder.paymentMethod,
+                paymentStatus: updatedOrder.paymentStatus,
                 isNewCustomer: updatedOrder.isNewCustomer,
                 createdAt: updatedOrder.createdAt
               }
@@ -212,6 +214,8 @@ router.get('/verify-session/:sessionId', async (req, res) => {
                 deliveryInfo: savedOrder.deliveryInfo,
                 totalAmount: savedOrder.totalAmount,
                 orderStatus: savedOrder.orderStatus,
+                paymentMethod: savedOrder.paymentMethod,
+                paymentStatus: savedOrder.paymentStatus,
                 createdAt: savedOrder.createdAt
               }
             });

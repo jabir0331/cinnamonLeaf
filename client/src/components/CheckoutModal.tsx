@@ -2,11 +2,12 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';   //This is to validate phone numbers
 import { X, CreditCard, Banknote, MapPin, Map as MapIcon, LocateFixed, Phone, User, MessageSquare, Mail } from 'lucide-react';
 import { DeliveryInfo, Landmark } from '../types/cart';
-import { withLandmarkNote } from '../utils/deliveryNotes';
+import type { ResolvedAddress } from '../utils/geocoding';
+import SelectedLocationCard from './SelectedLocationCard';
 import { getCurrentUser } from '../services/auth';
 import { DELIVERY_RADIUS_KM } from '../config/restaurant';
 import { COD_MAX_AMOUNT } from '../config/orderRules';
-import { isWithinDeliveryZone, outsideZoneMessage } from '../utils/deliveryZone';
+import { distanceFromRestaurantKm, isWithinDeliveryZone, outsideZoneMessage } from '../utils/deliveryZone';
 
 // Leaflet is only loaded when the user opens the map picker
 const LocationPicker = lazy(() => import('./LocationPicker'));
@@ -40,14 +41,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   }, [isCodUnavailable]);
   const [errors, setErrors] = useState<Partial<DeliveryInfo>>({});
   const [locationError, setLocationError] = useState('');
-  // manual = type it in; current/map = open the map picker (current starts from GPS)
-  const [addressMode, setAddressMode] = useState<'manual' | 'current' | 'map'>('manual');
+  // idle = show the location options or the confirmed location; current/map = the map picker is open (current starts from GPS)
+  const [addressMode, setAddressMode] = useState<'idle' | 'current' | 'map'>('idle');
+  // How the confirmed location is described to the customer (the pin itself lives in deliveryInfo.location)
+  const [place, setPlace] = useState<ResolvedAddress | null>(null);
 
   // Pre-fill name, phone and email from the user's saved profile each time the
   // modal opens, without overwriting anything they have already typed
   useEffect(() => {
     if (!isOpen) {
-      setAddressMode('manual');
+      setAddressMode('idle');
       return;
     }
     const token = localStorage.getItem('token');
@@ -97,11 +100,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       }
     }
 
-    // Address validation
-    if (!deliveryInfo.address.trim()) {
-      newErrors.address = 'Delivery address is required';
-    }
-
     // Delivery is limited to a radius around the restaurant, so the order needs a map pin inside it
     let nextLocationError = '';
     if (!deliveryInfo.location) {
@@ -129,23 +127,40 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
   };
 
-  // Confirming a map location fills the address box, saves the pin and writes the nearby
-  // landmarks into the delivery notes, then returns to the form
+  // Confirming a map location saves the pin and its nearby landmarks, and uses its address as the
+  // delivery address, then returns to the form
   const handleLocationConfirm = (
-    address: string | null,
+    resolvedPlace: ResolvedAddress | null,
     location: { lat: number; lng: number },
     landmarks: Landmark[]
   ) => {
+    const coordinates = `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`;
+    // The street address can't always be looked up, but the pin is enough for the rider
+    const confirmedPlace: ResolvedAddress = resolvedPlace ?? {
+      label: `Pinned location (${coordinates})`,
+      title: 'Pinned location',
+      subtitle: coordinates
+    };
+
+    setPlace(confirmedPlace);
     setDeliveryInfo(prev => ({
       ...prev,
-      address: address ?? prev.address,
+      address: confirmedPlace.label,
       location,
-      landmarks,
-      specialNotes: withLandmarkNote(prev.specialNotes ?? '', landmarks)
+      landmarks
     }));
-    if (address) setErrors(prev => ({ ...prev, address: undefined }));
     setLocationError('');
-    setAddressMode('manual');
+    setAddressMode('idle');
+  };
+
+  const handleLocationRemove = () => {
+    setPlace(null);
+    setDeliveryInfo(prev => ({
+      ...prev,
+      address: '',
+      location: undefined,
+      landmarks: undefined
+    }));
   };
 
   if (!isOpen) return null;
@@ -241,56 +256,29 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <div>
                     <label className="block font-body text-sm font-medium text-warm-brown-600 mb-2 flex">
                       <MapPin size={16} className="inline mr-1" />
-                      Delivery Address <span className="text-red-500 text-sm ml-2">*</span>
-                      {errors.address && (
-                        <p className="text-red-500 text-sm ml-1">{errors.address}</p>
-                      )}
+                      Delivery Location <span className="text-red-500 text-sm ml-2">*</span>
                     </label>
-                    {addressMode === 'manual' ? (
-                      <>
-                        <textarea
-                          value={deliveryInfo.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          rows={3}
-                          className={`w-full px-4 py-3 border rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-sage-green-100 focus:border-sage-green-200 transition-colors resize-none scrollbar-themed ${errors.address ? 'border-red-500' : 'border-cream-300'
-                            }`}
-                          placeholder="Enter your delivery address"
+                    {addressMode !== 'idle' ? (
+                      <Suspense fallback={<div className="h-80 rounded-2xl bg-cream-50 animate-pulse" />}>
+                        <LocationPicker
+                          initialLocation={deliveryInfo.location}
+                          useCurrentLocation={addressMode === 'current'}
+                          onConfirm={handleLocationConfirm}
+                          onCancel={() => setAddressMode('idle')}
                         />
-
-                        {deliveryInfo.location && (
-                          <div className="mt-3 flex items-center gap-3 rounded-xl border border-sage-green-200 bg-sage-green-50/60 px-3 py-2.5">
-                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-sage-green-300 bg-white">
-                              <MapPin className="h-4 w-4 text-sage-green-700" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-body text-sm font-medium text-warm-brown-800">Map pin saved</p>
-                              <p className="truncate font-body text-xs text-warm-brown-500">
-                                {deliveryInfo.location.lat.toFixed(5)}, {deliveryInfo.location.lng.toFixed(5)}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setDeliveryInfo(prev => ({
-                                ...prev,
-                                location: undefined,
-                                landmarks: undefined,
-                                specialNotes: withLandmarkNote(prev.specialNotes ?? '', [])
-                              }))}
-                              aria-label="Remove pin"
-                              className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-cream-300 bg-white px-3 py-1.5 font-body text-xs font-medium text-warm-brown-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-100"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                              Remove
-                            </button>
-                          </div>
-                        )}
-
-                        <div className="my-4 flex items-center">
-                          <div className="flex-1 border-t border-cream-200" />
-                          <span className="px-3 font-body text-xs text-warm-brown-500">or let us find you</span>
-                          <div className="flex-1 border-t border-cream-200" />
-                        </div>
-
+                      </Suspense>
+                    ) : deliveryInfo.location && place ? (
+                      <SelectedLocationCard
+                        title={place.title}
+                        subtitle={place.subtitle}
+                        kind={place.kind}
+                        distanceKm={distanceFromRestaurantKm(deliveryInfo.location)}
+                        landmarks={deliveryInfo.landmarks ?? []}
+                        onChange={() => setAddressMode('map')}
+                        onRemove={handleLocationRemove}
+                      />
+                    ) : (
+                      <>
                         <div className="overflow-hidden rounded-xl border border-cream-200 divide-y divide-cream-200">
                           <button
                             type="button"
@@ -323,17 +311,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           We deliver within {DELIVERY_RADIUS_KM} km of the restaurant.
                         </p>
                       </>
-                    ) : (
-                      <Suspense fallback={<div className="h-80 rounded-2xl bg-cream-50 animate-pulse" />}>
-                        <LocationPicker
-                          initialLocation={deliveryInfo.location}
-                          useCurrentLocation={addressMode === 'current'}
-                          onConfirm={handleLocationConfirm}
-                          onManual={() => setAddressMode('manual')}
-                        />
-                      </Suspense>
                     )}
-                    {locationError && addressMode === 'manual' && (
+                    {locationError && addressMode === 'idle' && (
                       <p role="alert" className="mt-2 font-body text-sm text-red-500">{locationError}</p>
                     )}
                   </div>

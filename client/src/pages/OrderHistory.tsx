@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Search, Info,Hourglass, Calendar, Package, CheckCircle, Truck, X, Eye, RotateCcw, MapPin, CreditCard, Banknote, Timer } from 'lucide-react';
+import { Search, Hourglass, Calendar, Package, CheckCircle, Truck, X, Eye, RotateCcw, CreditCard, Banknote, Timer } from 'lucide-react';
 import { getUserOrders } from '../services/order';
 import { getImageUrl } from '../utils/imageUrl';
+import { ORDER_STATUS_LABELS } from '../utils/orderConfirmation';
+import { addOrderToCart } from '../utils/reorder';
 
 interface OrderItem {
     id: string;
@@ -23,8 +26,7 @@ interface DeliveryInfo {
 interface Order {
     _id: string;
     orderNumber: string;
-    createdtedAt: string;
-    updatedAt: string;
+    createdAt: string;
     orderStatus: 'pending'| 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
     items: OrderItem[];
     totalAmount: number;
@@ -39,10 +41,22 @@ const OrderHistory: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [dateFilter, setDateFilter] = useState('all');
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // The filters live in the address bar, so they are still there after opening an order and coming back
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchTerm = searchParams.get('q') ?? '';
+    const statusFilter = searchParams.get('status') ?? 'all';
+    const dateFilter = searchParams.get('date') ?? 'all';
+    const setFilter = (key: string, value: string, defaultValue: string) => {
+        setSearchParams(previous => {
+            const next = new URLSearchParams(previous);
+            if (value === defaultValue) next.delete(key);
+            else next.set(key, value);
+            return next;
+        }, { replace: true });
+    };
 
     useEffect(() => {
 
@@ -71,60 +85,48 @@ const OrderHistory: React.FC = () => {
         fetchOrders();
     }, [token]);
 
-    useEffect(() => {
-        if (selectedOrder) {
-            document.body.classList.add('overflow-hidden');
-        } else {
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        return () => {
-            document.body.classList.remove('overflow-hidden');
-        };
-    }, [selectedOrder]);
-
     const getStatusConfig = (status: Order['orderStatus']) => {
         switch (status) {
             case 'pending':
                 return {
                     color: 'bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-700 border-yellow-200 shadow-sm',
                     icon: <Hourglass size={16} className="drop-shadow-sm animate-pulse" />,
-                    label: 'Pending',
+                    label: ORDER_STATUS_LABELS['pending'],
                     pulseColor: 'bg-yellow-400'
                 };
             case 'confirmed':
                 return {
                     color: 'bg-gradient-to-r from-teal-50 to-teal-100 text-teal-700 border-teal-200 shadow-sm',
                     icon: <CheckCircle size={16} className="drop-shadow-sm" />,
-                    label: 'Confirmed',
+                    label: ORDER_STATUS_LABELS['confirmed'],
                     pulseColor: 'bg-teal-400'
                 };
             case 'preparing':
                 return {
                     color: 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border-orange-200 shadow-sm',
                     icon: <Timer size={16} className="drop-shadow-sm animate-pulse" />,
-                    label: 'Preparing',
+                    label: ORDER_STATUS_LABELS['preparing'],
                     pulseColor: 'bg-orange-400'
                 };
             case 'out_for_delivery':
                 return {
                     color: 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 shadow-sm',
                     icon: <Truck size={16} className="drop-shadow-sm" />,
-                    label: 'Out for Delivery',
+                    label: ORDER_STATUS_LABELS['out_for_delivery'],
                     pulseColor: 'bg-blue-400'
                 };
             case 'delivered':
                 return {
                     color: 'bg-gradient-to-r from-green-50 to-green-100 text-green-700 border-green-200 shadow-sm',
                     icon: <CheckCircle size={16} className="drop-shadow-sm" />,
-                    label: 'Delivered',
+                    label: ORDER_STATUS_LABELS['delivered'],
                     pulseColor: 'bg-green-400'
                 };
             case 'cancelled':
                 return {
                     color: 'bg-gradient-to-r from-red-50 to-red-100 text-red-700 border-red-200 shadow-sm',
                     icon: <X size={16} className="drop-shadow-sm" />,
-                    label: 'Cancelled',
+                    label: ORDER_STATUS_LABELS['cancelled'],
                     pulseColor: 'bg-red-400'
                 };
             default:
@@ -142,9 +144,9 @@ const OrderHistory: React.FC = () => {
             order.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesStatus = statusFilter === 'all' || order.orderStatus === statusFilter;
         const matchesDate = dateFilter === 'all' ||
-            (dateFilter === 'today' && new Date(order.updatedAt).toDateString() === new Date().toDateString()) ||
-            (dateFilter === 'week' && new Date(order.updatedAt) >= new Date(new Date().setDate(new Date().getDate() - 7))) ||
-            (dateFilter === 'month' && new Date(order.updatedAt).getMonth() === new Date().getMonth());
+            (dateFilter === 'today' && new Date(order.createdAt).toDateString() === new Date().toDateString()) ||
+            (dateFilter === 'week' && new Date(order.createdAt) >= new Date(new Date().setDate(new Date().getDate() - 7))) ||
+            (dateFilter === 'month' && new Date(order.createdAt).getMonth() === new Date().getMonth());
 
         return matchesSearch && matchesStatus && matchesDate;
     });
@@ -164,9 +166,14 @@ const OrderHistory: React.FC = () => {
         );
     }
 
+    // Puts the items of a past order back in the cart and opens it on the menu page
     const handleReorder = (order: Order) => {
-        // Implement reorder functionality
-        console.log('Reordering:', order.orderNumber);
+        if (addOrderToCart(order.items) === 0) {
+            toast.info('These items are no longer available to reorder.');
+            return;
+        }
+        toast.success('Items from this order were added to your cart.');
+        navigate('/menu', { state: { resumeCheckout: true } });
     };
 
     const formatDate = (dateString: string) => {
@@ -201,7 +208,7 @@ const OrderHistory: React.FC = () => {
                                         type="text"
                                         placeholder="Search by order number or item name..."
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e) => setFilter('q', e.target.value, '')}
                                         className="w-full pl-10 pr-4 py-2 border border-cream-300 rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-sage-green-300 transition-colors bg-white"
                                     />
                                 </div>
@@ -211,15 +218,16 @@ const OrderHistory: React.FC = () => {
                             <div className="lg:w-48">
                                 <select
                                     value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    onChange={(e) => setFilter('status', e.target.value, 'all')}
                                     className="w-full px-4 py-2 border border-cream-300 rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-sage-green-300 transition-colors bg-white"
                                 >
                                     <option value="all">All Status</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="preparing">Preparing</option>
-                                    <option value="out_for_delivery">On Delivery</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="cancelled">Cancelled</option>
+                                    <option value="pending">{ORDER_STATUS_LABELS.pending}</option>
+                                    <option value="confirmed">{ORDER_STATUS_LABELS.confirmed}</option>
+                                    <option value="preparing">{ORDER_STATUS_LABELS.preparing}</option>
+                                    <option value="out_for_delivery">{ORDER_STATUS_LABELS.out_for_delivery}</option>
+                                    <option value="delivered">{ORDER_STATUS_LABELS.delivered}</option>
+                                    <option value="cancelled">{ORDER_STATUS_LABELS.cancelled}</option>
                                 </select>
                             </div>
 
@@ -227,7 +235,7 @@ const OrderHistory: React.FC = () => {
                             <div className="lg:w-48">
                                 <select
                                     value={dateFilter}
-                                    onChange={(e) => setDateFilter(e.target.value)}
+                                    onChange={(e) => setFilter('date', e.target.value, 'all')}
                                     className="w-full px-4 py-2 border border-cream-300 rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-sage-green-300 transition-colors bg-white"
                                 >
                                     <option value="all">All Time</option>
@@ -275,7 +283,7 @@ const OrderHistory: React.FC = () => {
                                                     </h3>
                                                     <p className="font-body text-warm-brown-500 flex items-center gap-2">
                                                         <Calendar size={16} className="text-sage-green-500" />
-                                                        {formatDate(order.updatedAt)}
+                                                        {formatDate(order.createdAt)}
                                                     </p>
                                                 </div>
                                                 <div className="relative">
@@ -292,13 +300,14 @@ const OrderHistory: React.FC = () => {
                                             </div>
 
                                             <div className="flex items-center gap-4">
-                                                <button
-                                                    onClick={() => setSelectedOrder(order)}
+                                                <Link
+                                                    to={`/orders/${encodeURIComponent(order.orderNumber)}`}
+                                                    state={{ from: location.pathname + location.search }}
                                                     className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-cream-100 to-cream-200 hover:from-cream-200 hover:to-cream-300 text-warm-brown-700 rounded-xl font-body font-semibold transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-cream-300"
                                                 >
                                                     <Eye size={18} />
                                                     View Details
-                                                </button>
+                                                </Link>
                                                 {order.orderStatus === 'delivered' && (
                                                     <button
                                                         onClick={() => handleReorder(order)}
@@ -393,126 +402,6 @@ const OrderHistory: React.FC = () => {
                     </div>
                 )}
             </div>
-
-            {/* Enhanced Order Details Modal */}
-            {selectedOrder && (
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex items-center justify-center min-h-screen p-4">
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedOrder(null)} />
-
-                        <div className="relative bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-cream-200">
-                            <div className="px-8">
-                                {/* Enhanced Modal Header */}
-                                <div className="sticky top-0 left-0 bg-gradient-to-r from-white/90 to-cream-50/90 backdrop-blur-md z-50 -mx-8 px-8 pt-8 pb-6 flex items-center justify-between border-b-2 border-cream-200 mb-6">
-                                    <h2 className="font-display text-3xl font-bold bg-gradient-to-r from-warm-brown-700 to-sage-green-600 bg-clip-text text-transparent">
-                                        Order Details
-                                    </h2>
-                                    <button
-                                        onClick={() => setSelectedOrder(null)}
-                                        className="p-3 hover:bg-cream-100 rounded-2xl transition-colors duration-200 group"
-                                    >
-                                        <X size={24} className="text-warm-brown-600 group-hover:text-warm-brown-800" />
-                                    </button>
-                                </div>
-
-                                {/* Enhanced Order Info */}
-                                <div className="space-y-8 pt-2 pb-6">
-                                    <div className="grid md:grid-cols-1 gap-6">
-                                        <div className="bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl p-6 border-2 border-cream-200">
-                                        {/* <div className="bg-gradient-to-r from-sage-green-50 to-warm-brown-50 rounded-2xl p-6 border-2 border-cream-200"> */}
-                                            <h3 className="font-display font-bold text-warm-brown-700 mb-6 flex items-center gap-3 text-lg">
-                                                <Info size={24} className="text-sage-green-600" />
-                                                Order Information
-                                            </h3>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl">
-                                                    <span className="text-warm-brown-600 font-medium">Order Number:</span>
-                                                    <span className="font-bold text-warm-brown-700 text-lg">{selectedOrder.orderNumber}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl">
-                                                    <span className="text-warm-brown-600 font-medium">Date:</span>
-                                                    <span className="font-semibold text-warm-brown-700">{formatDate(selectedOrder.updatedAt)}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl">
-                                                    <span className="text-warm-brown-600 font-medium">Status:</span>
-                                                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold ${getStatusConfig(selectedOrder.orderStatus).color}`}>
-                                                        {getStatusConfig(selectedOrder.orderStatus).icon}
-                                                        {getStatusConfig(selectedOrder.orderStatus).label}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* <div className="bg-gradient-to-r from-sage-green-50 to-warm-brown-50 rounded-2xl p-6 border-2 border-cream-200"> */}
-                                        <div className="bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl p-6 border-2 border-cream-200">
-                                            <h3 className="font-display font-bold text-warm-brown-700 mb-6 flex items-center gap-3 text-lg">
-                                                <MapPin size={24} className="text-sage-green-600" />
-                                                Delivery Information
-                                            </h3>
-                                            <div className="space-y-4">
-                                                <div className="p-3 bg-white/60 rounded-xl">
-                                                    <span className="text-warm-brown-600 font-medium block mb-2">Address:</span>
-                                                    <p className="font-semibold text-warm-brown-700">{selectedOrder.deliveryInfo.address}</p>
-                                                </div>
-                                                <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl">
-                                                    <span className="text-warm-brown-600 font-medium">Phone:</span>
-                                                    <span className="font-semibold text-warm-brown-700">{selectedOrder.deliveryInfo.phone}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Enhanced Items List */}
-                                    {/* <div> */}
-                                    <div className="bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl p-6 border-2 border-cream-200">
-                                        <h3 className="font-display font-bold text-warm-brown-700 mb-6 flex items-center gap-3 text-lg">
-                                            <Package size={24} className="text-sage-green-600" />
-                                            Items Ordered
-                                        </h3>
-                                        <div className="space-y-4">
-                                            {selectedOrder.items.map((item) => (
-                                                <div key={item.id} className="flex items-center gap-6 p-6 bg-gradient-to-r from-cream-50 to-sage-green-50 rounded-2xl border border-cream-200 hover:shadow-lg transition-all duration-200 group">
-                                                    <div className="relative overflow-hidden rounded-2xl shadow-lg">
-                                                        <img
-                                                            src={getImageUrl(item.image)}
-                                                            alt={item.name}
-                                                            className="w-20 h-20 object-cover transform group-hover:scale-110 transition-transform duration-200"
-                                                        />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="font-body font-bold text-warm-brown-700 text-lg mb-1">{item.name}</h4>
-                                                        <p className="font-body text-warm-brown-500">
-                                                            Quantity: {item.quantity} × LKR {item.price.toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-body font-bold text-sage-green-600 text-xl">
-                                                            LKR {(item.quantity * item.price).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Enhanced Total */}
-                                    <div className="border-t-2 border-cream-300 pt-6">
-                                        <div className="flex justify-between items-center p-6 bg-gradient-to-r from-sage-green-100 to-warm-brown-100 rounded-2xl border-2 border-sage-green-200 shadow-inner">
-                                            <span className="font-display text-2xl font-bold text-warm-brown-700">
-                                                Total Amount:
-                                            </span>
-                                            <span className="font-body text-3xl font-bold text-sage-green-600">
-                                                LKR {selectedOrder.totalAmount.toLocaleString()}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

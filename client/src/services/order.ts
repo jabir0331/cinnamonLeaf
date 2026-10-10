@@ -32,6 +32,17 @@ export const cancelUnpaidOrder = async (orderNumber: string) => {
   });
 };
 
+// One of the signed-in customer's own orders, for the order confirmation page
+export const getOrderByNumber = async (orderNumber: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No auth token found");
+
+  const response = await axios.get(`${API_URL}/orders/${encodeURIComponent(orderNumber)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
 export const getUserOrders = async () => {
   try {
     const token = localStorage.getItem("token");

@@ -43,3 +43,20 @@ export interface Order {
   status: 'pending' | 'confirmed' | 'delivered';
   createdAt: Date;
 }
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
+export type PaymentMethod = 'cod' | 'card';
+export type PaymentStatus = 'pending' | 'paid' | 'failed';
+
+// An order as the confirmation page shows it, whichever way it was loaded (saved order or Stripe session)
+export interface ConfirmedOrder {
+  orderNumber: string;
+  createdAt: string; // ISO date
+  orderStatus: OrderStatus;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  items: { id?: string; name: string; quantity: number; price: number; category?: string; image?: string }[];
+  totalAmount: number;
+  deliveryInfo: DeliveryInfo;
+  // True when the customer had no delivered orders before this one
+  isNewCustomer: boolean;
+}
