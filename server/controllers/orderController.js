@@ -125,15 +125,18 @@ exports.updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { orderStatus: status, updatedAt: Date.now() },
-      { new: true, runValidators: true }
-    );
+    const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
+
+    order.orderStatus = status;
+    // The rider collects the cash on delivery, so a delivered cash order has been paid
+    if (status === 'delivered' && order.paymentMethod === 'cod') {
+      order.paymentStatus = 'paid';
+    }
+    await order.save();
 
     res.json({ success: true, order });
   } catch (err) {
